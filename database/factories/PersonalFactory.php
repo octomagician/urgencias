@@ -22,7 +22,7 @@ class PersonalFactory extends Factory
     public function definition()
     {
         return [
-            'persona_id' => Personas::factory(), 
+            'persona_id' => Persona::factory(), 
             'tipo_id' => TiposDePersonal::factory(),
         ];
     }

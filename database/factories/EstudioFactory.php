@@ -28,7 +28,7 @@ class EstudioFactory extends Factory
     public function definition()
     {
         return [
-            'tipos_de_estudio_id' => TiposDeEstudio::inRandomOrder()->first()->id,
+            'tipos_de_estudios_id' => TiposDeEstudio::inRandomOrder()->first()->id,
             'personal_id' => Personal::inRandomOrder()->first()->id, // Crea un nuevo personal
         ];
     }

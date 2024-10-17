@@ -20,7 +20,7 @@ class PacienteFactory extends Factory
     public function definition()
     {
         return [
-            'persona_id' => Personas::factory(),
+            'persona_id' => Persona::factory(),
             'nacimiento' => $this->faker->date(),
             'nss' => $this->faker->unique()->numerify('###########'),
             'direccion' => $this->faker->address(),

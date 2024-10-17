@@ -7,6 +7,8 @@ use App\Models\Diagnostico;
 use App\Models\Ingreso;
 use App\Models\Historial;
 use App\Models\Paciente;
+use App\Models\Cama;
+use App\Models\Personal;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ingresos>
  */
@@ -20,7 +22,7 @@ class IngresoFactory extends Factory
     public function definition()
     {
         return [
-            'pacientes_id' => Pacientes::inRandomOrder()->first()->id,
+            'pacientes_id' => Paciente::inRandomOrder()->first()->id,
             'diagnostico_id' => Diagnostico::inRandomOrder()->first()->id,
             'camas_id' => Cama::inRandomOrder()->first()->id,
             'personal_id' => Personal::inRandomOrder()->first()->id,

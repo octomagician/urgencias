@@ -18,7 +18,7 @@ class PersonaFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    protected $model = Personas::class;
+    protected $model = Persona::class;
     
     public function definition()
     {
