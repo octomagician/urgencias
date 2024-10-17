@@ -16,7 +16,7 @@ use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\CamaController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\HistorialController;
-use App\Http\Controllers\TiposDeEstudiosController;
+use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
 
 use App\Http\Controllers\Auth\SanctumController;
@@ -70,4 +70,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('cama/{id?}', [CamaController::class, 'read']);
     Route::put('cama/{id}', [CamaController::class, 'update']);
     Route::delete('cama/{id}', [CamaController::class, 'delete']);
+
+    //tipos de estudio
+    Route::post('tipos-de-estudio/create', [TiposDeEstudioController::class, 'create']);
+    Route::get('tipos-de-estudio/{id?}', [TiposDeEstudioController::class, 'read']);
+    Route::put('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'update']);
+    Route::delete('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'delete']);
+
+    //estudios
+    Route::post('estudios/create', [EstudiosController::class, 'create']);
+    Route::get('estudios/{id?}', [EstudiosController::class, 'read']);
+    Route::put('estudios/{id}', [EstudiosController::class, 'update']);
+    Route::delete('estudios/{id}', [EstudiosController::class, 'delete']);
+
+    //diagnósticos
+    Route::post('diagnostico/create', [DiagnosticoController::class, 'create']);
+    Route::get('diagnostico/{id?}', [DiagnosticoController::class, 'read']);
+    Route::put('diagnostico/{id}', [DiagnosticoController::class, 'update']);
+    Route::delete('diagnostico/{id}', [DiagnosticoController::class, 'delete']);
+
+    //ingresos
+    Route::post('ingresos/create', [IngresoController::class, 'create']);
+    Route::get('ingresos/{id?}', [IngresoController::class, 'read']);
+    Route::put('ingresos/{id}', [IngresoController::class, 'update']);
+    Route::delete('ingresos/{id}', [IngresoController::class, 'delete']);
+
+    //historial
+    Route::post('historial/create', [HistorialController::class, 'create']);
+    Route::get('historial/{id?}', [HistorialController::class, 'read']);
+    Route::put('historial/{id}', [HistorialController::class, 'update']);
+    Route::delete('historial/{id}', [HistorialController::class, 'delete']);
 });

@@ -7,65 +7,59 @@ use Illuminate\Http\Request;
 
 class DiagnosticoController extends Controller
 {
-    // Muestra la lista de diagnósticos
-    public function index()
+    public function create(Request $request)
     {
-        $diagnosticos = Diagnostico::all();
-        return view('diagnosticos.index', compact('diagnosticos'));
-    }
-
-    // Muestra el formulario para crear un nuevo diagnóstico
-    public function create()
-    {
-        return view('diagnosticos.create');
-    }
-
-    // Guarda un nuevo diagnóstico
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'dx' => 'required',
-            'estatus' => 'required|in:sospechoso,confirmado,descartado',
+        $request->validate([
+            'dx' => 'required|string',
+            'estatus' => 'required|in:sospechoso,confirmado,descartado'
         ]);
 
-        Diagnostico::create($validatedData);
-
-        return redirect()->route('diagnosticos.index')
-                         ->with('success', 'Diagnóstico creado correctamente.');
-    }
-
-    // Muestra los detalles de un diagnóstico específico
-    public function show(Diagnostico $diagnostico)
-    {
-        return view('diagnosticos.show', compact('diagnostico'));
-    }
-
-    // Muestra el formulario para editar un diagnóstico existente
-    public function edit(Diagnostico $diagnostico)
-    {
-        return view('diagnosticos.edit', compact('diagnostico'));
-    }
-
-    // Actualiza un diagnóstico existente
-    public function update(Request $request, Diagnostico $diagnostico)
-    {
-        $validatedData = $request->validate([
-            'dx' => 'required',
-            'estatus' => 'required|in:sospechoso,confirmado,descartado',
+        $diagnostico = Diagnostico::create([
+            'dx' => $request->dx,
+            'estatus' => $request->estatus
         ]);
 
-        $diagnostico->update($validatedData);
-
-        return redirect()->route('diagnosticos.index')
-                         ->with('success', 'Diagnóstico actualizado correctamente.');
+        return response()->json($diagnostico, 201);
     }
 
-    // Elimina un diagnóstico
-    public function destroy(Diagnostico $diagnostico)
+    public function read($id = null)
     {
+        if ($id) {
+            $diagnostico = Diagnostico::find($id);
+            if (!$diagnostico) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
+        } else {
+            $diagnostico = Diagnostico::all();
+        }
+
+        return response()->json($diagnostico, 200);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $diagnostico = Diagnostico::find($id);
+        if (!$diagnostico) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $request->validate([
+            'dx' => 'required|string',
+            'estatus' => 'required|in:sospechoso,confirmado,descartado'
+        ]);
+
+        $diagnostico->update($request->only(['dx', 'estatus']));
+        return response()->json($diagnostico);
+    }
+
+    public function delete($id)
+    {
+        $diagnostico = Diagnostico::find($id);
+        if (!$diagnostico) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
         $diagnostico->delete();
-
-        return redirect()->route('diagnosticos.index')
-                         ->with('success', 'Diagnóstico eliminado correctamente.');
+        return response()->json(['message' => 'Eliminado'], 204);
     }
 }

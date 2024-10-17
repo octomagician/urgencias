@@ -9,81 +9,83 @@ use Illuminate\Http\Request;
 
 class HistorialController extends Controller
 {
-    // Lista todos los registros de historial
-    public function index()
+    public function create(Request $request)
     {
-        $historiales = Historial::with(['ingreso', 'personal'])->get();
-        return view('historial.index', compact('historiales'));
-    }
-
-    // Muestra el formulario para crear un nuevo registro de historial
-    public function create()
-    {
-        $ingresos = Ingreso::all();
-        $personal = Personal::all();
-        
-        return view('historial.create', compact('ingresos', 'personal'));
-    }
-
-    // Guarda un nuevo registro de historial
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
+        $request->validate([
             'ingreso_id' => 'required|exists:ingresos,id',
             'personal_id' => 'required|exists:personal,id',
             'presion' => 'required|string|max:10',
-            'temperatura' => 'required|numeric|between:30,45',
-            'glucosa' => 'required|numeric|between:30,999.99',
+            'temperatura' => 'required|numeric|between:0,100.00',
+            'glucosa' => 'required|numeric|between:0,999.99',
             'sintomatologia' => 'required|string',
-            'observaciones' => 'nullable|string',
+            'observaciones' => 'nullable|string'
         ]);
 
-        Historial::create($validatedData);
+        $historial = Historial::create([
+            'ingreso_id' => $request->ingreso_id,
+            'personal_id' => $request->personal_id,
+            'presion' => $request->presion,
+            'temperatura' => $request->temperatura,
+            'glucosa' => $request->glucosa,
+            'sintomatologia' => $request->sintomatologia,
+            'observaciones' => $request->observaciones
+        ]);
 
-        return redirect()->route('historial.index')
-                         ->with('success', 'Historial creado correctamente.');
+        return response()->json($historial, 201);
     }
 
-    // Muestra los detalles de un registro de historial
-    public function show(Historial $historial)
+    public function read($id = null)
     {
-        return view('historial.show', compact('historial'));
+        if ($id) {
+            $historial = Historial::find($id);
+            if (!$historial) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
+        } else {
+            $historial = Historial::all();
+        }
+
+        return response()->json($historial, 200);
     }
 
-    // Muestra el formulario para editar un registro de historial
-    public function edit(Historial $historial)
+    public function update(Request $request, $id)
     {
-        $ingresos = Ingreso::all();
-        $personal = Personal::all();
-        
-        return view('historial.edit', compact('historial', 'ingresos', 'personal'));
-    }
+        $historial = Historial::find($id);
+        if (!$historial) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
 
-    // Actualiza un registro de historial
-    public function update(Request $request, Historial $historial)
-    {
-        $validatedData = $request->validate([
+        $request->validate([
             'ingreso_id' => 'required|exists:ingresos,id',
             'personal_id' => 'required|exists:personal,id',
             'presion' => 'required|string|max:10',
-            'temperatura' => 'required|numeric|between:30,45',
-            'glucosa' => 'required|numeric|between:30,999.99',
+            'temperatura' => 'required|numeric|between:0,100.00',
+            'glucosa' => 'required|numeric|between:0,999.99',
             'sintomatologia' => 'required|string',
-            'observaciones' => 'nullable|string',
+            'observaciones' => 'nullable|string'
         ]);
 
-        $historial->update($validatedData);
+        $historial->update($request->only([
+            'ingreso_id',
+            'personal_id',
+            'presion',
+            'temperatura',
+            'glucosa',
+            'sintomatologia',
+            'observaciones'
+        ]));
 
-        return redirect()->route('historial.index')
-                         ->with('success', 'Historial actualizado correctamente.');
+        return response()->json($historial);
     }
 
-    // Elimina un registro de historial
-    public function destroy(Historial $historial)
+    public function delete($id)
     {
+        $historial = Historial::find($id);
+        if (!$historial) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
         $historial->delete();
-
-        return redirect()->route('historial.index')
-                         ->with('success', 'Historial eliminado correctamente.');
+        return response()->json(['message' => 'Eliminado'], 204);
     }
 }

@@ -2,76 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Estudios;
-use App\Models\TiposDeEstudios;
+use App\Models\Estudio;
+use App\Models\TiposDeEstudio;
 use App\Models\Personal;
 use Illuminate\Http\Request;
 
 class EstudiosController extends Controller
 {
-    // Lista todos los registros de estudios
-    public function index()
+    public function create(Request $request)
     {
-        $estudios = Estudios::with(['tipos_de_estudios', 'personal'])->get();
-        return view('estudios.index', compact('estudios'));
-    }
-
-    // Muestra el formulario para crear un nuevo registro
-    public function create()
-    {
-        $tiposDeEstudios = TiposDeEstudios::all();
-        $personal = Personal::all();
-        return view('estudios.create', compact('tiposDeEstudios', 'personal'));
-    }
-
-    // Guarda un nuevo registro de estudios
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
+        $request->validate([
             'tipos_de_estudios_id' => 'required|exists:tipos_de_estudios,id',
-            'personal_id' => 'required|exists:personal,id',
+            'personal_id' => 'required|exists:personal,id'
         ]);
 
-        Estudios::create($validatedData);
-
-        return redirect()->route('estudios.index')
-                         ->with('success', 'Estudio creado correctamente.');
-    }
-
-    // Muestra los detalles de un registro de estudios específico
-    public function show(Estudios $estudio)
-    {
-        return view('estudios.show', compact('estudio'));
-    }
-
-    // Muestra el formulario para editar un registro de estudios
-    public function edit(Estudios $estudio)
-    {
-        $tiposDeEstudios = TiposDeEstudios::all();
-        $personal = Personal::all();
-        return view('estudios.edit', compact('estudio', 'tiposDeEstudios', 'personal'));
-    }
-
-    // Actualiza un registro de estudios existente
-    public function update(Request $request, Estudios $estudio)
-    {
-        $validatedData = $request->validate([
-            'tipos_de_estudios_id' => 'required|exists:tipos_de_estudios,id',
-            'personal_id' => 'required|exists:personal,id',
+        $estudio = Estudio::create([
+            'tipos_de_estudios_id' => $request->tipos_de_estudios_id,
+            'personal_id' => $request->personal_id
         ]);
 
-        $estudio->update($validatedData);
-
-        return redirect()->route('estudios.index')
-                         ->with('success', 'Estudio actualizado correctamente.');
+        return response()->json($estudio, 201);
     }
 
-    // Elimina un registro de estudios
-    public function destroy(Estudios $estudio)
+    public function read($id = null)
     {
+        if ($id) {
+            $estudio = Estudio::find($id);
+            if (!$estudio) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
+        } else {
+            $estudio = Estudio::all();
+        }
+
+        return response()->json($estudio, 200);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $estudio = Estudio::find($id);
+        if (!$estudio) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
+        $request->validate([
+            'tipos_de_estudios_id' => 'required|exists:tipos_de_estudios,id',
+            'personal_id' => 'required|exists:personal,id'
+        ]);
+
+        $estudio->update($request->only(['tipos_de_estudios_id', 'personal_id']));
+        return response()->json($estudio);
+    }
+
+    public function delete($id)
+    {
+        $estudio = Estudio::find($id);
+        if (!$estudio) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        }
+
         $estudio->delete();
-
-        return redirect()->route('estudios.index')
-                         ->with('success', 'Estudio eliminado correctamente.');
+        return response()->json(['message' => 'Eliminado'], 204);
     }
 }

@@ -11,85 +11,83 @@ use Illuminate\Http\Request;
 
 class IngresoController extends Controller
 {
-    // Lista todos los ingresos
-    public function index()
+    public function create(Request $request)
     {
-        $ingresos = Ingreso::with(['paciente', 'diagnostico', 'cama', 'personal'])->get();
-        return view('ingresos.index', compact('ingresos'));
-    }
-
-    // Muestra el formulario para crear un nuevo ingreso
-    public function create()
-    {
-        $pacientes = Paciente::all();
-        $diagnosticos = Diagnostico::all();
-        $camas = Cama::all();
-        $personal = Personal::all();
-        
-        return view('ingresos.create', compact('pacientes', 'diagnosticos', 'camas', 'personal'));
-    }
-
-    // Guarda un nuevo ingreso
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
+        $request->validate([
             'pacientes_id' => 'required|exists:pacientes,id',
             'diagnostico_id' => 'required|exists:diagnosticos,id',
             'camas_id' => 'required|exists:camas,id',
             'personal_id' => 'required|exists:personal,id',
             'fecha_ingreso' => 'required|date',
             'motivo_ingreso' => 'required|string',
-            'fecha_alta' => 'nullable|date',
+            'fecha_alta' => 'nullable|date'
         ]);
 
-        Ingreso::create($validatedData);
+        $ingreso = Ingreso::create([
+            'pacientes_id' => $request->pacientes_id,
+            'diagnostico_id' => $request->diagnostico_id,
+            'camas_id' => $request->camas_id,
+            'personal_id' => $request->personal_id,
+            'fecha_ingreso' => $request->fecha_ingreso,
+            'motivo_ingreso' => $request->motivo_ingreso,
+            'fecha_alta' => $request->fecha_alta
+        ]);
 
-        return redirect()->route('ingresos.index')
-                         ->with('success', 'Ingreso creado correctamente.');
+        return response()->json($ingreso, 201);
     }
 
-    // Muestra los detalles de un ingreso específico
-    public function show(Ingreso $ingreso)
+    public function read($id = null)
     {
-        return view('ingresos.show', compact('ingreso'));
+        if ($id) {
+            $ingreso = Ingreso::find($id);
+            if (!$ingreso) {
+                return response()->json(['message' => 'Ingreso no encontrado'], 404);
+            }
+        } else {
+            $ingreso = Ingreso::all();
+        }
+
+        return response()->json($ingreso, 200);
     }
 
-    // Muestra el formulario para editar un ingreso
-    public function edit(Ingreso $ingreso)
+    public function update(Request $request, $id)
     {
-        $pacientes = Paciente::all();
-        $diagnosticos = Diagnostico::all();
-        $camas = Cama::all();
-        $personal = Personal::all();
-        
-        return view('ingresos.edit', compact('ingreso', 'pacientes', 'diagnosticos', 'camas', 'personal'));
-    }
+        $ingreso = Ingreso::find($id);
+        if (!$ingreso) {
+            return response()->json(['message' => 'Ingreso no encontrado'], 404);
+        }
 
-    // Actualiza un ingreso existente
-    public function update(Request $request, Ingreso $ingreso)
-    {
-        $validatedData = $request->validate([
+        $request->validate([
             'pacientes_id' => 'required|exists:pacientes,id',
             'diagnostico_id' => 'required|exists:diagnosticos,id',
             'camas_id' => 'required|exists:camas,id',
             'personal_id' => 'required|exists:personal,id',
             'fecha_ingreso' => 'required|date',
             'motivo_ingreso' => 'required|string',
-            'fecha_alta' => 'nullable|date',
+            'fecha_alta' => 'nullable|date'
         ]);
 
-        $ingreso->update($validatedData);
+        $ingreso->update($request->only([
+            'pacientes_id',
+            'diagnostico_id',
+            'camas_id',
+            'personal_id',
+            'fecha_ingreso',
+            'motivo_ingreso',
+            'fecha_alta'
+        ]));
 
-        return redirect()->route('ingresos.index')
-                         ->with('success', 'Ingreso actualizado correctamente.');
+        return response()->json($ingreso);
     }
 
-    // Elimina un ingreso
-    public function destroy(Ingreso $ingreso)
+    public function delete($id)
     {
+        $ingreso = Ingreso::find($id);
+        if (!$ingreso) {
+            return response()->json(['message' => 'Ingreso no encontrado'], 404);
+        }
+
         $ingreso->delete();
-
-        return redirect()->route('ingresos.index')
-                         ->with('success', 'Ingreso eliminado correctamente.');
+        return response()->json(['message' => 'Ingreso eliminado'], 204);
     }
 }
