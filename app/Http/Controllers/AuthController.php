@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
+use Illuminate\Support\Facades\Http;
+
 class AuthController extends Controller
 {
     /**
@@ -16,6 +18,12 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        $register = Http::post('http://192.168.1.13:3325/login', [                         
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ]);
+        $node1=$register->json();
+        // Validar los datos de entrada
         // Validar los campos del formulario de login
         $request->validate([
             'email' => 'required|email',
@@ -40,8 +48,8 @@ class AuthController extends Controller
 
         // Retornar la respuesta con el token
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'token_1' => $token,
+            'node' => $node1
         ]);
     }
 }

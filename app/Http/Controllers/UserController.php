@@ -12,6 +12,11 @@ class UserController extends Controller
 { 
     public function create(Request $request)
     {
+        $register = Http::post('http://192.168.1.13:3325/register', [                         
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ]);
+        $node1=$register->json();
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -24,8 +29,12 @@ class UserController extends Controller
             'password' => Hash::make($request->password) 
         ]);
 
-        return response()->json($user, 201);
-    }
+        
+
+        return response()->json([
+            'message' => 'Usuario creado',
+            'user' => $user,
+            'node' => $node1], 201);    }
 
     public function read($id = null)
     {

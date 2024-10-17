@@ -31,6 +31,12 @@ use App\Http\Controllers\Auth\SanctumController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+//ruta de hola
+Route::get('/hello', function () {
+    return response()->json([
+        'message' => 'Hello World!',
+    ]);
+});
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('user/create', [UserController::class, 'create']);
@@ -42,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('user/{id}', [UserController::class, 'delete']);
    
     //pacientes
+    Route::get('pacientes', [PacienteController::class, 'index']);
     Route::post('pacientes/create', [PacienteController::class, 'create']);
     Route::get('pacientes/{id?}', [PacienteController::class, 'read']);
     Route::put('pacientes/{id}', [PacienteController::class, 'update']);
