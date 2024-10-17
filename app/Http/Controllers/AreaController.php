@@ -7,63 +7,45 @@ use Illuminate\Http\Request;
 
 class AreaController extends Controller
 {
-    // Muestra la lista de áreas
-    public function index()
+    public function create(Request $request)
     {
-        $areas = Area::all();
-        return view('areas.index', compact('areas'));
-    }
-
-    // Muestra el formulario para crear una nueva área
-    public function create()
-    {
-        return view('areas.create');
-    }
-
-    // Guarda una nueva área
-    public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'nombre' => 'required|max:50',
+        $request->validate([
+            'nombre' => 'required|max:50'
         ]);
 
-        Area::create($validatedData);
-
-        return redirect()->route('areas.index')
-                         ->with('success', 'Área creada correctamente.');
-    }
-
-    // Muestra los detalles de una área específica
-    public function show(Area $area)
-    {
-        return view('areas.show', compact('area'));
-    }
-
-    // Muestra el formulario para editar un área existente
-    public function edit(Area $area)
-    {
-        return view('areas.edit', compact('area'));
-    }
-
-    // Actualiza un área existente
-    public function update(Request $request, Area $area)
-    {
-        $validatedData = $request->validate([
-            'nombre' => 'required|max:50',
+        $areas = Area::create([
+            'nombre' => $request->nombre
         ]);
 
-        $area->update($validatedData);
-
-        return redirect()->route('areas.index')
-                         ->with('success', 'Área actualizada correctamente.');
+        return response()->json($areas, 201);
     }
 
-    // Elimina un área
-    public function destroy(Area $area)
+    public function read($id = null)
     {
-        $area->delete();
+        if ($id) {
+            $areas = Area::find($id);
+            if (!$areas) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
+        } else {
+            $areas = Area::all();
+        }
+    
+        return response()->json($areas, 200);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        $areas = Area::find($id);
+        $areas->update($request->all());
+        return response()->json($areas);
+    }
 
-        return redirect()->route('areas.index')
-                         ->with('success', 'Área eliminada correctamente.');
+    public function delete($id)
+    {
+        $areas = Area::find($id);
+        $areas->delete();
+        return response()->json(['message' => 'Eliminado'], 204);
     }
 }
+

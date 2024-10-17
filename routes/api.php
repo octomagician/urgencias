@@ -9,7 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PacienteController;
-use App\Http\Controllers\TipoDePersonalController;
+use App\Http\Controllers\TiposDePersonalController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\DiagnosticoController;
@@ -54,8 +54,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('personal/{id}', [PersonalController::class, 'delete']);
 
     //tipos de personal
-    Route::post('tipos-de-personal/create', [TipoDePersonalController::class, 'create']);
-    Route::get('tipos-de-personal/{id?}', [TipoDePersonalController::class, 'read']);
-    Route::put('tipos-de-personal/{id}', [TipoDePersonalController::class, 'update']);
-    Route::delete('tipos-de-personal/{id}', [TipoDePersonalController::class, 'delete']);
+    Route::post('tipos-de-personal/create', [TiposDePersonalController::class, 'create']);
+    Route::get('tipos-de-personal/{id?}', [TiposDePersonalController::class, 'read']);
+    Route::put('tipos-de-personal/{id}', [TiposDePersonalController::class, 'update']);
+    Route::delete('tipos-de-personal/{id}', [TiposDePersonalController::class, 'delete']);
+
+    //area
+    Route::post('area/create', [AreaController::class, 'create']);
+    Route::get('area/{id?}', [AreaController::class, 'read']);
+    Route::put('area/{id}', [AreaController::class, 'update']);
+    Route::delete('area/{id}', [AreaController::class, 'delete']);
+
+    //cama
+    Route::post('cama/create', [CamaController::class, 'create']);
+    Route::get('cama/{id?}', [CamaController::class, 'read']);
+    Route::put('cama/{id}', [CamaController::class, 'update']);
+    Route::delete('cama/{id}', [CamaController::class, 'delete']);
 });
