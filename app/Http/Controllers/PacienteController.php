@@ -69,6 +69,7 @@ class PacienteController extends Controller
                 ]);
 
         $datas = $response->json();
+        
 
             
         $validatedData = $request->validate([
