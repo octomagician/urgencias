@@ -12,7 +12,7 @@ class UserController extends Controller
 { 
     public function create(Request $request)
     {
-        $register = Http::post('http://192.168.1.13:3325/register', [                         
+        $register = Http::post('http://192.168.118.187:3325/register', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);

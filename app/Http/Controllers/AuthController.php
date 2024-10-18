@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $register = Http::post('http://192.168.1.13:3325/login', [                         
+        $register = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);

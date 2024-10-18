@@ -15,7 +15,7 @@ class PacienteController extends Controller
 {
     public function index(Request $request)
     {
-        $login = Http::post('http://192.168.1.13:3325/login', [                         
+        $login = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
@@ -23,7 +23,7 @@ class PacienteController extends Controller
 
         $response = Http::withToken($token)
             ->timeout(80)
-            ->get('http://192.168.1.13:3325/mascotas',[
+            ->get('http://192.168.118.187:3325/mascotas',[
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
@@ -40,7 +40,7 @@ class PacienteController extends Controller
        try {
            
     $faker = Faker::create();
-        $login = Http::post('http://192.168.1.13:3325/login', [                         
+        $login = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('emails'),
             'password' => $request->input('passwords'),
         ]);
@@ -48,7 +48,7 @@ class PacienteController extends Controller
 
         $response = Http::withToken($token)
             ->timeout(80)
-            ->post('http://192.168.1.13:3325/mascotas/crear',[
+            ->post('http://192.168.118.187:3325/mascotas/crear',[
                 'emails' => $request->input('emails'),
                 'password' => $request->input('passwords'),
                     'nombre' => $faker->name,  // Nombre de la mascota
@@ -126,7 +126,7 @@ class PacienteController extends Controller
     {
      
         if ($id) {
-            $login = Http::post('http://192.168.1.13:3325/login', [                         
+            $login = Http::post('http://192.168.118.187:3325/login', [                         
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
@@ -134,7 +134,7 @@ class PacienteController extends Controller
     
             $response = Http::withToken($token)
                 ->timeout(80)
-                ->get('http://192.168.1.13:3325/mascotas/'.$id,[
+                ->get('http://192.168.118.187:3325/mascotas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -161,7 +161,7 @@ class PacienteController extends Controller
     public function update(Request $request, $id)
     {
         $faker= Faker::create();
-        $login = Http::post('http://192.168.1.13:3325/login', [                         
+        $login = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
@@ -169,7 +169,7 @@ class PacienteController extends Controller
 
         $response = Http::withToken($token)
             ->timeout(80)
-            ->put('http://192.168.1.13:3325/mascotas/'.$id.'/editar',[
+            ->put('http://192.168.118.187:3325/mascotas/'.$id.'/editar',[
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
                 'nombre' => $faker->firstName,
@@ -205,7 +205,7 @@ class PacienteController extends Controller
     public function delete($id, Request $request)
     {
         try {
-        $login = Http::post('http://192.168.1.13:3325/login', [                         
+        $login = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
@@ -213,7 +213,7 @@ class PacienteController extends Controller
 
         $response = Http::withToken($token)
             ->timeout(80)
-            ->delete('http://192.168.1.13:3325/mascotas/'.$id,[
+            ->delete('http://192.168.118.187:3325/mascotas/'.$id,[
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
