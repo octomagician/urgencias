@@ -15,27 +15,60 @@ use Faker\Factory as Faker;
 class PacienteController extends Controller
 {
     public function index(Request $request)
-    {
+{
+    // Obtén el token desde la base de datos
+    $tokenData = Token::where('api_name', 'API2')->first();
+
+    // Verifica si hay un token y si no ha expirado
+    if ($tokenData && $tokenData->expires_at > now()) {
+        $token = $tokenData->token;
+    } else {
+        // Si no hay token o ha expirado, realiza la solicitud de login
         $login = Http::post('http://192.168.118.187:3325/login', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
+        
+        // Asegúrate de manejar posibles errores en la respuesta
+        if ($login->failed()) {
+            return response()->json(['error' => 'Login failed'], 401);
+        }
+
+        // Obtén el nuevo token
         $token = $login->json()['token_2'];
 
-        $response = Http::withToken($token)
-            ->timeout(80)
-            ->get('http://192.168.118.187:3325/mascotas',[
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
-            ]);
-
-        $datas = $response->json();
-
-        $pacientes = Paciente::all();
-        return response()->json([
-            'pacientes' => $pacientes,
-            'mascotas' => $datas], 200);
+        // Guarda el nuevo token en la base de datos
+        $tokenData = new Token();
+        $tokenData->api_name = 'API2';
+        $tokenData->token = $token;
+        $tokenData->expires_at = now()->addMinutes(60); // Asigna la duración del token según lo necesario
+        $tokenData->save();
     }
+
+    // Realiza la solicitud a la API usando el token obtenido
+    $response = Http::withToken($token)
+        ->timeout(80)
+        ->get('http://192.168.118.187:3325/mascotas', [
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+        ]);
+
+    // Asegúrate de manejar posibles errores en la respuesta
+    if ($response->failed()) {
+        return response()->json(['error' => 'Failed to fetch mascotas'], 500);
+    }
+
+    $datas = $response->json();
+
+    // Obtén los pacientes de la base de datos
+    $pacientes = Paciente::all();
+
+    // Devuelve la respuesta
+    return response()->json([
+        'pacientes' => $pacientes,
+        'mascotas' => $datas,
+    ], 200);
+}
 
     
     public function create(Request $request)
