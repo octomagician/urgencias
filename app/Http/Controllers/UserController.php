@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
+//users
 class UserController extends Controller
 { 
     public function create(Request $request)

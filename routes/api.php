@@ -43,10 +43,17 @@ Route::post('user/create', [UserController::class, 'create']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // users
-    Route::get('user/{id?}', [UserController::class, 'read']); //individual con ID o general sin ID
+    Route::get('user/{id?}', [UserController::class, 'read']);
     Route::put('user/{id}', [UserController::class, 'update']);
     Route::delete('user/{id}', [UserController::class, 'delete']);
    
+    //personas
+    Route::get('personas', [PersonaController::class, 'index']);
+    Route::post('personas/create', [PersonaController::class, 'create']);
+    Route::get('personas/{id?}', [PersonaController::class, 'read']);
+    Route::put('personas/{id}', [PersonaController::class, 'update']);
+    Route::delete('personas/{id}', [PersonaController::class, 'delete']);
+
     //pacientes
     Route::get('pacientes', [PacienteController::class, 'index']);
     Route::post('pacientes/create', [PacienteController::class, 'create']);

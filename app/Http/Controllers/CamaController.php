@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Cama;
 use App\Models\Area;
 use Illuminate\Http\Request;
+use Faker\Factory as Faker;
 
+//humanos
 class CamaController extends Controller
 {
         public function create(Request $request)

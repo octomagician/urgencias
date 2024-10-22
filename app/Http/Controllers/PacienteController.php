@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Faker\Factory as Faker;
 
+//mascotas
 class PacienteController extends Controller
 {
     public function index(Request $request)
@@ -35,6 +36,8 @@ class PacienteController extends Controller
             'pacientes' => $pacientes,
             'mascotas' => $datas], 200);
     }
+
+    
     public function create(Request $request)
     {
        try {
@@ -51,20 +54,20 @@ class PacienteController extends Controller
             ->post('http://192.168.118.187:3325/mascotas/crear',[
                 'emails' => $request->input('emails'),
                 'password' => $request->input('passwords'),
-                    'nombre' => $faker->name,  // Nombre de la mascota
-                    'edad' => $faker->numberBetween(1, 10),  // Edad de la mascota
+                    'nombre' => $faker->name,
+                    'edad' => $faker->numberBetween(1, 10),
                     'dueno' => [
-                        'nombre' => $faker->name,  // Nombre del dueño
-                        'email' => $faker->email,  // Email del dueño
-                        'telefono' => $faker->phoneNumber,  // Teléfono del dueño
+                        'nombre' => $faker->name,
+                        'email' => $faker->email, 
+                        'telefono' => $faker->phoneNumber, 
                     ],
                     'raza' => [
-                        'nombre' => $faker->word,  // Nombre de la raza
-                        'descripcion' => $faker->sentence,  // Descripción de la raza
+                        'nombre' => $faker->word, 
+                        'descripcion' => $faker->sentence, 
                     ],
                     'vacuna' => [
-                        'nombre' => $faker->word,  // Nombre de la vacuna
-                        'descripcion' => $faker->sentence,  // Descripción de la vacuna
+                        'nombre' => $faker->word,
+                        'descripcion' => $faker->sentence, 
                     ]
                 ]);
 
