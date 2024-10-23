@@ -39,6 +39,7 @@ Route::get('/hello', function () {
     ]);
 });
 
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('user/create', [UserController::class, 'create']);
 Route::post('/token-command', [TokenController::class, 'store']);
