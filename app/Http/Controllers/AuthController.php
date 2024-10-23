@@ -18,12 +18,29 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $register = Http::post('http://192.168.118.187:3325/login', [                         
+        $register = Http::withOptions([
+            'verify' => false,
+        ])->post('https://9315-104-28-199-132.ngrok-free.app/login', [
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
-        $node1=$register->json();
-        // Validar los datos de entrada
+        $node1 = $register->json();
+
+        // consegimos solo el token_2
+        $token2 = $node1['token_2'];
+        $token3 = $node1['token_3'];
+        $token4 = $node1['token_4'];
+        
+        Http::withOptions([
+            'verify' => false,
+        ])->post('https://9315-104-28-199-132.ngrok-free.app/token-command', [
+            'token2' => $token2,
+            'token3' => $token3
+        ]);
+        Http::post('http://192.168.1.13:8001/api/token-command', [
+            'token3' => $token3,
+            'token4' => $token4,
+       ]);
         // Validar los campos del formulario de login
         $request->validate([
             'email' => 'required|email',
@@ -44,12 +61,14 @@ class AuthController extends Controller
         $user->tokens()->delete();
 
         // Crear un nuevo token de acceso para el usuario
-        $token = $user->createToken('auth_token')->plainTextToken;
-
+        $token = $user->createToken('auth_token')->plainTextToken;   
+        Http::post('http://192.168.1.13:8003/api/token-command', [
+            'token1' => $token,
+            'token2' => $token2
+        ]);
         // Retornar la respuesta con el token
         return response()->json([
-            'token_1' => $token,
-            'node' => $node1
+            'message' => 'Autenticación exitosa',
         ]);
     }
 }

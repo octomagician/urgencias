@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TokenController;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
@@ -40,6 +41,7 @@ Route::get('/hello', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('user/create', [UserController::class, 'create']);
+Route::post('/token-command', [TokenController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // users

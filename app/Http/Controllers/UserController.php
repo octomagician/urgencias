@@ -13,7 +13,9 @@ class UserController extends Controller
 { 
     public function create(Request $request)
     {
-        $register = Http::post('http://192.168.118.187:3325/register', [                         
+        $register = Http::withOptions([
+            'verify' => false,
+        ])->post('https://9315-104-28-199-132.ngrok-free.app/register', [                         
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
