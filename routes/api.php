@@ -38,6 +38,8 @@ Route::get('/hello', function () {
     ]);
 });
 
+Route::get('/getToken', [TuControlador::class, 'create']);
+Route::get('/readToken', [TuControlador::class, 'read']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('user/create', [UserController::class, 'create']);
 

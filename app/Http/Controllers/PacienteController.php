@@ -241,11 +241,22 @@ class PacienteController extends Controller
     public function delete($id, Request $request)
     {
         try {
-        $login = Http::post('http://192.168.118.187:3325/login', [                         
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ]);
-        $token = $login->json()['token_2'];
+        //$login = Http::post('http://192.168.118.187:3325/login', [                         
+        //    'email' => $request->input('email'),
+        //    'password' => $request->input('password'),
+        //]);
+        //$token = $login->json()['token_2'];
+
+        // Llamar a la función read del TokenController para obtener el token
+        $tokenData = app(TokenController::class)->read();
+
+        // Verificar si la respuesta fue exitosa y extraer el token
+        if ($tokenData->getStatusCode() !== 200) {
+            return response()->json(['error' => 'No se pudo obtener el token.'], 500);
+        }
+
+        // Cambiamos el nombre de la variable a $token
+        $token = $tokenData->getData()->token;
 
         $response = Http::withToken($token)
             ->timeout(80)
