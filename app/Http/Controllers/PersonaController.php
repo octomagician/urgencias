@@ -7,6 +7,11 @@ use App\Models\Persona;
 use Illuminate\Http\Request;
 use Faker\Factory as Faker;
 
+
+use App\Models\Token;
+use Illuminate\Support\Facades\Http;
+
+
 //visitas
 class PersonaController extends Controller
 {
@@ -21,11 +26,29 @@ class PersonaController extends Controller
         try { //para cachar errores de validación
             $faker = Faker::create();
             //mandar credenciales a la sig api
-            $login = Http::post('http://192.168.118.187:3325/login', [                         
-                'email' => $request->input('emails'),
-                'password' => $request->input('passwords'),
-            ]);
-            $token = $login->json()['token_2'];
+
+
+                            // Obtén el valor del encabezado Authorization
+                            $authHeader = $request->header('Authorization');
+
+                            // Verifica si el encabezado está presente
+                            if (!$authHeader) {
+                                return response()->json(['message' => 'Authorization header not found'], 401);
+                            }
+                    
+                            // Extrae el token Bearer del encabezado
+                            $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
+                    
+                            // Ahora puedes usar este token para buscar en tu base de datos
+                            $tokenRecord = Token::where('token1', $token)->first();
+                    
+                            // Verifica si el token fue encontrado
+                            if (!$tokenRecord) {
+                                return response()->json(['message' => 'Token not found'], 404);
+                            }
+                    
+                            // Accede al campo 'token2'
+                            $token2 = $tokenRecord->token2;
     
             $response = Http::withToken($token)
                 ->timeout(80)
@@ -78,16 +101,31 @@ class PersonaController extends Controller
             }
     }
 
-    public function read($id = null)
+    public function read($id = null, Request $request)
     {
         if ($id) {
 
-            //lógica para acceder al sig api
-            $login = Http::post('http://192.168.118.187:3325/login', [                         
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
-            ]);
-            $token = $login->json()['token_2'];
+                // Obtén el valor del encabezado Authorization
+                $authHeader = $request->header('Authorization');
+
+                // Verifica si el encabezado está presente
+                if (!$authHeader) {
+                    return response()->json(['message' => 'Authorization header not found'], 401);
+                }
+        
+                // Extrae el token Bearer del encabezado
+                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
+        
+                // Ahora puedes usar este token para buscar en tu base de datos
+                $tokenRecord = Token::where('token1', $token)->first();
+        
+                // Verifica si el token fue encontrado
+                if (!$tokenRecord) {
+                    return response()->json(['message' => 'Token not found'], 404);
+                }
+        
+                // Accede al campo 'token2'
+                $token2 = $tokenRecord->token2;
     
             $response = Http::withToken($token)
                 ->timeout(80)
@@ -122,11 +160,29 @@ class PersonaController extends Controller
     {
         //sig appi acceso
         $faker= Faker::create();
-        $login = Http::post('http://192.168.118.187:3325/login', [                         
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ]);
-        $token = $login->json()['token_2'];
+
+                // Obtén el valor del encabezado Authorization
+                $authHeader = $request->header('Authorization');
+
+                // Verifica si el encabezado está presente
+                if (!$authHeader) {
+                    return response()->json(['message' => 'Authorization header not found'], 401);
+                }
+        
+                // Extrae el token Bearer del encabezado
+                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
+        
+                // Ahora puedes usar este token para buscar en tu base de datos
+                $tokenRecord = Token::where('token1', $token)->first();
+        
+                // Verifica si el token fue encontrado
+                if (!$tokenRecord) {
+                    return response()->json(['message' => 'Token not found'], 404);
+                }
+        
+                // Accede al campo 'token2'
+                $token2 = $tokenRecord->token2;
+
         //sig appi petición
         $response = Http::withToken($token)
             ->timeout(80)
@@ -153,14 +209,32 @@ class PersonaController extends Controller
         return response()->json(['message' => 'Datos actualizado correctamente'], 200);
     }
 
-    public function delete(Persona $persona)
+    public function delete(Persona $persona, Request $request)
     {
         try {
-            $login = Http::post('http://192.168.118.187:3325/login', [                         
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
-            ]);
-            $token = $login->json()['token_2'];
+
+
+                            // Obtén el valor del encabezado Authorization
+                            $authHeader = $request->header('Authorization');
+
+                            // Verifica si el encabezado está presente
+                            if (!$authHeader) {
+                                return response()->json(['message' => 'Authorization header not found'], 401);
+                            }
+                    
+                            // Extrae el token Bearer del encabezado
+                            $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
+                    
+                            // Ahora puedes usar este token para buscar en tu base de datos
+                            $tokenRecord = Token::where('token1', $token)->first();
+                    
+                            // Verifica si el token fue encontrado
+                            if (!$tokenRecord) {
+                                return response()->json(['message' => 'Token not found'], 404);
+                            }
+                    
+                            // Accede al campo 'token2'
+                            $token2 = $tokenRecord->token2;
     
             $response = Http::withToken($token)
                 ->timeout(80)

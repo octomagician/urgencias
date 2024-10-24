@@ -44,7 +44,7 @@ class PacienteController extends Controller
         $response = Http::withOptions(['verify' => false])
             ->withToken($token2)
             ->timeout(80)
-            ->get('https://9315-104-28-199-132.ngrok-free.app/mascotas', [
+            ->get('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/mascotas', [
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
@@ -97,7 +97,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->post('https://9315-104-28-199-132.ngrok-free.app/mascotas/crear', [
+                ->post('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/mascotas/crear', [
                     'emails' => $request->input('emails'),
                     'password' => $request->input('passwords'),
                     'nombre' => $faker->name,
@@ -202,7 +202,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->get('https://9315-104-28-199-132.ngrok-free.app/mascotas/' . $id, [
+                ->get('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/mascotas/' . $id, [
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -254,9 +254,7 @@ class PacienteController extends Controller
         $response =  Http::withOptions(['verify' => false])
             ->withToken($token2)
             ->timeout(80)
-            ->put('https://9315-104-28-199-132.ngrok-free.app/mascotas/' . $id . '/editar', [
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
+            ->put('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/mascotas/' . $id . '/editar', [
                 'nombre' => $faker->firstName,
                 'edad' => $faker->numberBetween(1, 10),
             ]);
@@ -316,7 +314,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->delete('https://9315-104-28-199-132.ngrok-free.app/mascotas/' . $id, [
+                ->delete('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/mascotas/' . $id, [
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);

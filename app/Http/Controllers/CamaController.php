@@ -6,6 +6,8 @@ use App\Models\Cama;
 use App\Models\Area;
 use Illuminate\Http\Request;
 use Faker\Factory as Faker;
+use App\Models\Token;
+use Illuminate\Support\Facades\Http;
 
 //humanos
 class CamaController extends Controller

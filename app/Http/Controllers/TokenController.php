@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Token;
+use App\Http\Controllers\Token;
 use Illuminate\Support\Facades\Http;
 
 class TokenController extends Controller
@@ -25,9 +26,9 @@ class TokenController extends Controller
                 ['token2' => $request->token2]   // Actualizar o crear con token2
             );
 
-            return response()->json(['message' => 'Token updated or created successfully!', 'data' => $token], 201);
+            return response()->json(['data' => $token], 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error saving token', 'error' => $e->getMessage()], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

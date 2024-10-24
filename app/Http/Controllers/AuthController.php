@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
-use App\Http\Controllers\TokenController; // Asegúrate de importar el TokenController
+use App\Http\Controllers\TokenController;
+use App\Models\Token;
 
 class AuthController extends Controller
 {
@@ -20,7 +21,7 @@ class AuthController extends Controller
     {
         $register = Http::withOptions([
             'verify' => false,
-        ])->post('https://9315-104-28-199-132.ngrok-free.app/login', [
+        ])->post('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/login', [
             'email' => $request->input('email'),
             'password' => $request->input('password'),
         ]);
@@ -29,18 +30,13 @@ class AuthController extends Controller
         // consegimos solo el token_2
         $token2 = $node1['token_2'];
         $token3 = $node1['token_3'];
-        $token4 = $node1['token_4'];
+        //$token4 = $node1['token_4'];
         
-        Http::withOptions([
-            'verify' => false,
-        ])->post('https://9315-104-28-199-132.ngrok-free.app/token-command', [
-            'token2' => $token2,
-            'token3' => $token3
-        ]);
-        Http::post('http://192.168.1.13:8001/api/token-command', [
-            'token3' => $token3,
-            'token4' => $token4,
-       ]);
+
+        //Http::post('https://fc3d-2806-267-1489-2a1-1d66-fa00-3a02-de6.ngrok-free.app/api/token-command', [
+          //  'token3' => $token3,
+            //'token4' => $token4,
+       //]);
         // Validar los campos del formulario de login
         $request->validate([
             'email' => 'required|email',
@@ -60,15 +56,29 @@ class AuthController extends Controller
         // Eliminar tokens antiguos si es necesario
         $user->tokens()->delete();
 
+
+
         // Crear un nuevo token de acceso para el usuario
         $token = $user->createToken('auth_token')->plainTextToken;   
-        Http::post('http://192.168.1.13:8003/api/token-command', [
-            'token1' => $token,
-            'token2' => $token2
+        Http::withOptions([
+            'verify' => false,
+        ])->post('https://7fc8-2806-267-148b-15bf-125-e767-a22d-b16a.ngrok-free.app/token-command', [
+            'token2' => $token2,
+            'token3' => $token3
         ]);
+        
+        // Actualiza o crea el registro del token según token1
+        $token = Token::updateOrCreate(
+            ['token1' => $token],  // Buscar por token1
+            ['token2' => $token2]   // Actualizar o crear con token2
+        );
+
         // Retornar la respuesta con el token
         return response()->json([
-            'message' => 'Autenticación exitosa',
+            //'message' => 'Autenticación exitosa',
+            'token1' => $token
         ]);
+
+
     }
 }
