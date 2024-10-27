@@ -9,6 +9,7 @@ class ProfileController extends Controller
 {
     public function login(Request $request)
     {
+    try { 
         $validate = Validator::make(
             $request->all(),
             [
@@ -57,5 +58,8 @@ class ProfileController extends Controller
                 'token' => $token
             ], 201
         );
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 422);
+    }  
     }
 }

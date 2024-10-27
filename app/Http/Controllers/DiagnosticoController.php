@@ -11,31 +11,19 @@ class DiagnosticoController extends Controller
 {
     public function create(Request $request)
     {
-        try { //para cachar errores de validación
-            $faker = Faker::create();
-
-                            // Obtén el valor del encabezado Authorization
-                            $authHeader = $request->header('Authorization');
-
-                            // Verifica si el encabezado está presente
-                            if (!$authHeader) {
-                                return response()->json(['message' => 'Authorization header not found'], 401);
-                            }
-                    
-                            // Extrae el token Bearer del encabezado
-                            $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-                    
-                            // Ahora puedes usar este token para buscar en tu base de datos
-                            $tokenRecord = Token::where('token1', $token)->first();
-                    
-                            // Verifica si el token fue encontrado
-                            if (!$tokenRecord) {
-                                return response()->json(['message' => 'Token not found'], 404);
-                            }
-                    
-                            // Accede al campo 'token2'
-                            $token2 = $tokenRecord->token2;
-    
+        try { 
+            $faker= Faker::create();
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader) {
+                return response()->json(['message' => 'Authorization header not found'], 401);
+            }
+            $token = str_replace('Bearer ', '', $authHeader);
+            $tokenRecord = Token::where('token1', $token)->first();
+            if (!$tokenRecord) {
+                return response()->json(['message' => 'Token not found'], 404);
+            }
+            $token2 = $tokenRecord->token2;
+        
             $response = Http::withToken($token)
                 ->timeout(80)
                 //crear en la tabla de la sig api
@@ -48,17 +36,17 @@ class DiagnosticoController extends Controller
                 ]);
             $datas = $response->json();
 
-        $request->validate([
-            'dx' => 'required|string',
-            'estatus' => 'required|in:sospechoso,confirmado,descartado'
-        ]);
+            $request->validate([
+                'dx' => 'required|string',
+                'estatus' => 'required|in:sospechoso,confirmado,descartado'
+            ]);
 
-        $diagnostico = Diagnostico::create([
-            'dx' => $request->dx,
-            'estatus' => $request->estatus
-        ]);
+            $diagnostico = Diagnostico::create([
+                'dx' => $request->dx,
+                'estatus' => $request->estatus
+            ]);
 
-        return response()->json($diagnostico, 201);
+            return response()->json($diagnostico, 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->validator->errors()], 422);
         }
@@ -66,134 +54,107 @@ class DiagnosticoController extends Controller
 
     public function read($id = null, Request $request)
     {
-        if ($id) {
-
-                // Obtén el valor del encabezado Authorization
+        try { 
+            if ($id) {
+                $faker= Faker::create();
                 $authHeader = $request->header('Authorization');
-
-                // Verifica si el encabezado está presente
                 if (!$authHeader) {
                     return response()->json(['message' => 'Authorization header not found'], 401);
                 }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
+                $token = str_replace('Bearer ', '', $authHeader);
                 $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
                 if (!$tokenRecord) {
                     return response()->json(['message' => 'Token not found'], 404);
                 }
-        
-                // Accede al campo 'token2'
                 $token2 = $tokenRecord->token2;
 
-        $response = Http::withToken($token)
-            ->timeout(80)
-        //read a la sig appi
-            ->get('http://192.168.118.187:3325/veterinarios/'.$id,[
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-        ]);
+                $response = Http::withToken($token)
+                    ->timeout(80)
+                //read a la sig appi
+                    ->get('http://192.168.118.187:3325/veterinarios/'.$id,[
+                    'email' => $request->input('email'),
+                    'password' => $request->input('password'),
+                ]);
 
-        $datas = $response->json();
+                $datas = $response->json();
 
-        //this appi
+            //this appi
 
-            $diagnostico = Diagnostico::find($id);
-            if (!$diagnostico) {
-                return response()->json(['message' => 'No encontrado'], 404);
+                $diagnostico = Diagnostico::find($id);
+                if (!$diagnostico) {
+                    return response()->json(['message' => 'No encontrado'], 404);
+                }
+            } else {
+                $diagnostico = Diagnostico::all();
             }
-        } else {
-            $diagnostico = Diagnostico::all();
-        }
 
-        return response()->json([
-            'diagnostico' => $diagnostico,
-            'veterinarios' => $datas //respuesta del sig appi
-        ], 200);
+            return response()->json([
+                'diagnostico' => $diagnostico,
+                'veterinarios' => $datas //respuesta del sig appi
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }  
     }
 
     public function update(Request $request, $id)
     {
-        //sig appi acceso
-    $faker= Faker::create();
+        try {
+            $faker= Faker::create();
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader) {
+                return response()->json(['message' => 'Authorization header not found'], 401);
+            }
+            $token = str_replace('Bearer ', '', $authHeader);
+            $tokenRecord = Token::where('token1', $token)->first();
+            if (!$tokenRecord) {
+                return response()->json(['message' => 'Token not found'], 404);
+            }
+            $token2 = $tokenRecord->token2;
 
-                // Obtén el valor del encabezado Authorization
-                $authHeader = $request->header('Authorization');
+            //sig appi petición
+            $response = Http::withToken($token)
+                ->timeout(80)
+                ->put('http://192.168.118.187:3325/veterinarios/'.$id.'/editar',[
+                    'email' => $request->input('email'),
+                    'password' => $request->input('password'),
+                    'nombre' => $faker->name,
+                    'especializacion' => $faker->word, 
+                ]);
+            $datas = $response->json();
 
-                // Verifica si el encabezado está presente
-                if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
-                }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
-                $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
-                if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
-                }
-        
-                // Accede al campo 'token2'
-                $token2 = $tokenRecord->token2;
+            //this appi
+            $diagnostico = Diagnostico::find($id);
+            if (!$diagnostico) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
 
-    //sig appi petición
-    $response = Http::withToken($token)
-        ->timeout(80)
-        ->put('http://192.168.118.187:3325/veterinarios/'.$id.'/editar',[
-            'email' => $request->input('email'),
-            'password' => $request->input('password'),
-            'nombre' => $faker->name,
-            'especializacion' => $faker->word, 
-        ]);
-    $datas = $response->json();
+            $request->validate([
+                'dx' => 'required|string',
+                'estatus' => 'required|in:sospechoso,confirmado,descartado'
+            ]);
 
-    //this appi
-        $diagnostico = Diagnostico::find($id);
-        if (!$diagnostico) {
-            return response()->json(['message' => 'No encontrado'], 404);
-        }
-
-        $request->validate([
-            'dx' => 'required|string',
-            'estatus' => 'required|in:sospechoso,confirmado,descartado'
-        ]);
-
-        $diagnostico->update($request->only(['dx', 'estatus']));
-        return response()->json(['message' => 'Datos actualizado correctamente'], 200);
+            $diagnostico->update($request->only(['dx', 'estatus']));
+            return response()->json(['message' => 'Datos actualizado correctamente'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }  
     }
 
     public function delete($id, Request $request)
     {
-
         try {
-                // Obtén el valor del encabezado Authorization
-                $authHeader = $request->header('Authorization');
-
-                // Verifica si el encabezado está presente
-                if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
-                }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
-                $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
-                if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
-                }
-        
-                // Accede al campo 'token2'
-                $token2 = $tokenRecord->token2;
+            $faker= Faker::create();
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader) {
+                return response()->json(['message' => 'Authorization header not found'], 401);
+            }
+            $token = str_replace('Bearer ', '', $authHeader);
+            $tokenRecord = Token::where('token1', $token)->first();
+            if (!$tokenRecord) {
+                return response()->json(['message' => 'Token not found'], 404);
+            }
+            $token2 = $tokenRecord->token2;
     
             $response = Http::withToken($token)
                 ->timeout(80)
@@ -203,15 +164,15 @@ class DiagnosticoController extends Controller
                 ]);
             $datas = $response->json();
 
-        $diagnostico = Diagnostico::find($id);
-        if (!$diagnostico) {
-            return response()->json(['message' => 'No encontrado'], 404);
-        }
+            $diagnostico = Diagnostico::find($id);
+            if (!$diagnostico) {
+                return response()->json(['message' => 'No encontrado'], 404);
+            }
 
-        $diagnostico->delete();
-        return response()->json(['message' => 'Eliminado'], 204);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json(['errors' => $e->validator->errors()], 422);
-}
+            $diagnostico->delete();
+            return response()->json(['message' => 'Eliminado'], 204);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->validator->errors()], 422);
+        }
     }
 }

@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
             TiposDeEstudiosSeeder::class,
             
             AreasSeeder::class,
+            CamasSeeder::class,
             
             DiagnosticosSeeder::class,
             IngresosSeeder::class,

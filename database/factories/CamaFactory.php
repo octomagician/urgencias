@@ -29,7 +29,7 @@ class CamaFactory extends Factory
     {
         return [
             'numero_cama' => $this->faker->unique()->numberBetween(1, 100),
-            'area_id' => Area::inRandomOrder()->first()->id(),
+            'area_id' => Area::inRandomOrder()->first()->id,
         ];
     }
 }
