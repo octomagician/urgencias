@@ -15,6 +15,41 @@ use Illuminate\Support\Facades\Http;
 //consultas
 class IngresoController extends Controller
 {
+
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/consultas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$ingreso = Ingreso::all();
+            return response()->json([
+                'ingreso' => $ingreso,
+                'consultas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try { 
@@ -30,10 +65,10 @@ class IngresoController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/consultas/crear',[
+                ->post('http://192.168.120.231:3325/api/consultas',[
                         'email' => $request->input('email'),
                         'password' => $request->input('password'),
                         'mascota_id' => $faker->randomNumber(), 
@@ -84,10 +119,10 @@ class IngresoController extends Controller
                 }
                 $token2 = $tokenRecord->token2;
 
-                $response = Http::withToken($token)
+                $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.118.187:3325/consultas/'.$id,[
+                    ->get('http://192.168.120.231:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -128,9 +163,9 @@ class IngresoController extends Controller
             $token2 = $tokenRecord->token2;
 
             //sig appi petición
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.118.187:3325/consultas/'.$id.'/editar',[
+                ->put('http://192.168.120.231:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                     'mascota_id' => $faker->randomNumber(), 
@@ -187,9 +222,9 @@ class IngresoController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/consultas/'.$id,[
+                ->delete('http://192.168.120.231:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);

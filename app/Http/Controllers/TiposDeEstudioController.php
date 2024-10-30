@@ -12,6 +12,41 @@ use Illuminate\Support\Facades\Http;
 //vacunas
 class TiposDeEstudioController extends Controller
 {
+
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/vacunas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$tipo_de_estudio = TiposDeEstudio::all();
+            return response()->json([
+                'tipo_de_estudio' => $tipo_de_estudio,
+                'vacunas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try {
@@ -27,10 +62,10 @@ class TiposDeEstudioController extends Controller
             }
             $token2 = $tokenRecord->token2;
         
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/vacunas/crear',[
+                ->post('http://192.168.120.231:3325/api/vacunas',[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
 
@@ -48,7 +83,12 @@ class TiposDeEstudioController extends Controller
                 'nombre' => $request->nombre
             ]);
 
-            return response()->json($tipo_de_estudio, 201);
+            return response()->json([
+                'tipo_de_estudio' => $tipo_de_estudio,
+                'vacunas' => $datas
+            ], 201);
+
+
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->validator->errors()], 422);
         }
@@ -70,10 +110,10 @@ class TiposDeEstudioController extends Controller
                 }
                 $token2 = $tokenRecord->token2;
 
-                $response = Http::withToken($token)
+                $response = Http::withToken($token2)
                     ->timeout(80)
                     //read a la sig appi
-                    ->get('http://192.168.118.187:3325/vacunas/'.$id,[
+                    ->get('http://192.168.120.231:3325/api/vacunas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -114,11 +154,10 @@ class TiposDeEstudioController extends Controller
             $token2 = $tokenRecord->token2;
 
             //sig appi petición
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.118.187:3325/vacunas/'.$id.'/editar',[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                ->put('http://192.168.120.231:3325/api/vacunas/'.$id,[
+            
                     'nombre' => $faker->word,
                     'descripcion' => $faker->sentence(10),
                     'dosis' => $faker->randomNumber(2) . ' mg'
@@ -142,7 +181,7 @@ class TiposDeEstudioController extends Controller
         }  
     }
 
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         try {
             $faker= Faker::create();
@@ -157,11 +196,9 @@ class TiposDeEstudioController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/vacunas/'.$id,[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                ->delete('http://192.168.120.231:3325/api/vacunas/'.$id,[
                 ]);
             $datas = $response->json();
 

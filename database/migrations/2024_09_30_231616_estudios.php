@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('tipos_de_estudios_id');
             $table->unsignedBigInteger('personal_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('tipos_de_estudios_id')->references('id')->on('tipos_de_estudios');
             $table->foreign('personal_id')->references('id')->on('personal');

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->text('sintomatologia');
             $table->text('observaciones')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('ingreso_id')->references('id')->on('ingresos');
             $table->foreign('personal_id')->references('id')->on('personal');

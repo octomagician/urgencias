@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('numero_cama');
             $table->unsignedBigInteger('area_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('area_id')->references('id')->on('areas');
         });

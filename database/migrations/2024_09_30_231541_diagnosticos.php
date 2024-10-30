@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('fecha_diagnostico')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->enum('estatus', ['sospechoso', 'confirmado', 'descartado']);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

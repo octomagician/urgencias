@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
+use App\Models\Token;
+
 //users
 class UserController extends Controller
 { 
@@ -17,7 +19,7 @@ class UserController extends Controller
         try { 
             $register = Http::withOptions([
                 'verify' => false,
-            ])->post('http://192.168.118.187:3325/register', [                         
+            ])->post('http://192.168.120.231:3325/register', [                         
                 'email' => $request->input('email'),
                 'password' => $request->input('password'),
             ]);
@@ -59,6 +61,18 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         }  
+    }
+
+    public function index()
+    {
+        try { 
+            $users = User::all();
+            return response()->json($users, 200);
+        } catch (\Illuminate\Database\QueryException $e) { 
+            return response()->json(['error' => 'Error al consultar los datos de la base de datos.'], 500);
+        } catch (\Exception $e) { 
+            return response()->json(['error' => 'Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.'], 500);
+        }
     }
     
     public function update(Request $request, $id)

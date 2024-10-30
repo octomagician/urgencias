@@ -9,9 +9,44 @@ use Faker\Factory as Faker;
 use App\Models\Token;
 use Illuminate\Support\Facades\Http;
 
-//humanos
+//consultas
 class CamaController extends Controller
 {
+
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/consultas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$cama = Cama::all();
+            return response()->json([
+                'cama' => $cama,
+                'consultas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try { 
@@ -27,14 +62,12 @@ class CamaController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/consultas/crear',[
-                        'email' => $request->input('email'),
-                        'password' => $request->input('password'),
-                        'mascota_id' => $faker->randomNumber(), 
-                        'veterinario_id' => $faker->randomNumber(), 
+                ->post('http://192.168.120.231:3325/api/consultas',[
+/*                         'mascota_id' => $faker->randomNumber(), 
+                        'veterinario_id' => $faker->randomNumber(),  */
                         'diagnostico' => $faker->sentence(5),
                         'tratamiento' => $faker->sentence(8),
                 ]);
@@ -50,7 +83,12 @@ class CamaController extends Controller
                 'area_id' => $request->area_id
             ]);
     
-            return response()->json($cama, 201);
+            return response()->json([
+                'cama' => $cama,
+                'consultas' => $datas
+            ], 201);
+
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
         } 
@@ -72,10 +110,10 @@ class CamaController extends Controller
                 }
                 $token2 = $tokenRecord->token2;
 
-                $response = Http::withToken($token)
+                $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.118.187:3325/consultas/'.$id,[
+                    ->get('http://192.168.120.231:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -115,11 +153,9 @@ class CamaController extends Controller
             $token2 = $tokenRecord->token2;
 
             //sig appi petición
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.118.187:3325/consultas/'.$id.'/editar',[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                ->put('http://192.168.120.231:3325/api/consultas/'.$id,[
                     'mascota_id' => $faker->randomNumber(), 
                     'veterinario_id' => $faker->randomNumber(), 
                     'diagnostico' => $faker->sentence(5),
@@ -144,10 +180,10 @@ class CamaController extends Controller
         } 
     }
 
-    public function delete($id)
+    public function delete(Request $request, $id)
     {
         try { 
-            $faker= Faker::create();
+            $faker = Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
                 return response()->json(['message' => 'Authorization header not found'], 401);
@@ -159,13 +195,11 @@ class CamaController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/consultas/'.$id,[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
-                ]);
+                ->delete('http://192.168.120.231:3325/api/consultas/'.$id, []);
             $datas = $response->json();
+    
             $cama = Cama::find($id);
             if (!$cama) {
                 return response()->json(['message' => 'No encontrado'], 404);
@@ -175,6 +209,7 @@ class CamaController extends Controller
             return response()->json(['message' => 'Eliminado'], 204);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 422);
-        }  
+        }
     }
+    
 }

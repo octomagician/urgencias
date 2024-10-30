@@ -17,6 +17,41 @@ use Illuminate\Support\Facades\Http;
 //clinica veterinarias
 class PersonalController extends Controller
 {
+
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/clinicas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$personal = Personal::all();
+            return response()->json([
+                'personal' => $personal,
+                'clinicas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try { 
@@ -35,7 +70,7 @@ class PersonalController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/clinicas/crear',[
+                ->post('http://192.168.120.231:3325/api/clinicas',[
 
                     'nombre' => $faker->name,
                     'direccion' => $faker->numberBetween,
@@ -107,7 +142,7 @@ public function read($id = null, Request $request)
             $response = Http::withToken($token2)
                 ->timeout(80)
             //read a la sig appi
-                ->get('http://192.168.118.187:3325/clinicas/'.$id,[]);
+                ->get('http://192.168.120.231:3325/api/clinicas/'.$id,[]);
 
             $datas = $response->json();
 
@@ -147,7 +182,7 @@ public function update(Request $request, $id)
         //sig appi petición
         $response = Http::withToken($token2)
             ->timeout(80)
-            ->put('http://192.168.118.187:3325/clinicas/'.$id.'/editar',[
+            ->put('http://192.168.120.231:3325/api/clinicas/'.$id,[
                 'nombre' => $faker->firstName,
                 'edad' => $faker->numberBetween(1, 10),
             ]);
@@ -190,7 +225,7 @@ public function delete($id, Request $request)
 
         $response = Http::withToken($token2)
             ->timeout(80)
-            ->delete('http://192.168.118.187:3325/clinicas/'.$id,[
+            ->delete('http://192.168.120.231:3325/api/clinicas/'.$id,[
             ]);
         $datas = $response->json();
 

@@ -14,6 +14,40 @@ use Illuminate\Support\Facades\Http;
 class PersonaController extends Controller
 {
 
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/visitas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$persona = Persona::all();
+            return response()->json([
+                'persona' => $persona,
+                'visitas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try { 
@@ -29,10 +63,10 @@ class PersonaController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/visitas/crear',[
+                ->post('http://192.168.120.231:3325/api/visitas',[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                     
@@ -76,10 +110,10 @@ class PersonaController extends Controller
                 }
                 $token2 = $tokenRecord->token2;
         
-                $response = Http::withToken($token)
+                $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.118.187:3325/visitas/'.$id,[
+                    ->get('http://192.168.120.231:3325/api/visitas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -123,9 +157,9 @@ class PersonaController extends Controller
             $token2 = $tokenRecord->token2;
 
             //sig appi petición
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.118.187:3325/visitas/'.$id.'/editar',[
+                ->put('http://192.168.120.231:3325/api/visitas/'.$id,[
                     'fecha' => $faker->date(),
                     'motivo' => $faker->sentence(6), 
                     'mascota_id' => $faker->randomNumber(), 
@@ -168,11 +202,9 @@ class PersonaController extends Controller
             }
             $token2 = $tokenRecord->token2;
     
-            $response = Http::withToken($token)
+            $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/visitas/'.$id,[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                ->delete('http://192.168.120.231:3325/api/visitas/'.$id,[
                 ]);
             $datas = $response->json();
     

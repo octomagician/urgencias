@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('sexo', 1);
             $table->timestamps();
             $table->unsignedBigInteger('users_id')->nullable();
+            $table->softDeletes();
         });
     }
 

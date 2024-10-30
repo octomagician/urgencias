@@ -15,6 +15,41 @@ use Faker\Factory as Faker;
 //mascotas
 class PacienteController extends Controller
 {
+
+	public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/mascotas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$paciente = Paciente::all();
+            return response()->json([
+                'paciente' => $paciente,
+                'mascotas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try {
@@ -33,7 +68,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->post('http://192.168.118.187:3325/mascotas/crear', [
+                ->post('http://192.168.120.231:3325/api/mascotas', [
                     'emails' => $request->input('emails'),
                     'password' => $request->input('passwords'),
                     'nombre' => $faker->name,
@@ -125,9 +160,7 @@ class PacienteController extends Controller
                 $response =  Http::withOptions(['verify' => false])
                     ->withToken($token2)
                     ->timeout(80)
-                    ->get('http://192.168.118.187:3325/mascotas/' . $id, [
-                        'email' => $request->input('email'),
-                        'password' => $request->input('password'),
+                    ->get('http://192.168.120.231:3325/api/mascotas/' . $id, [
                     ]);
 
                 $datas = $response->json();
@@ -167,7 +200,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.118.187:3325/mascotas/' . $id . '/editar', [
+                ->put('http://192.168.120.231:3325/api/mascotas/' . $id, [
                     'nombre' => $faker->firstName,
                     'edad' => $faker->numberBetween(1, 10),
                 ]);
@@ -219,9 +252,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/mascotas/' . $id, [
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                ->delete('http://192.168.120.231:3325/api/mascotas/' . $id, [
                 ]);
 
             $datas = $response->json();

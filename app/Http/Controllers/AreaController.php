@@ -11,6 +11,40 @@ use Illuminate\Support\Facades\Http;
 //citas
 class AreaController extends Controller
 {
+    public function index()
+    {
+        try { 
+			$faker= Faker::create();
+			$authHeader = $request->header('Authorization');
+			if (!$authHeader) {
+				return response()->json(['message' => 'Authorization header not found'], 401);
+			}
+			$token = str_replace('Bearer ', '', $authHeader);
+			$tokenRecord = Token::where('token1', $token)->first();
+			if (!$tokenRecord) {
+				return response()->json(['message' => 'Token not found'], 404);
+			}
+			$token2 = $tokenRecord->token2;
+
+			$response = Http::withToken($token2)
+				->timeout(80)
+			//read a la sig appi
+				->get('http://192.168.120.231:3325/api/citas/index',[
+			]);
+
+			$datas = $response->json();
+
+			$areas = Area::all();
+            return response()->json([
+                'areas' => $areas,
+                'citas' => $datas //respuesta del sig appi
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } 
+    }
+
     public function create(Request $request)
     {
         try { //para cachar errores de validación
@@ -41,11 +75,11 @@ class AreaController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.118.187:3325/citas/crear',[
-                        'mascota_id' => $faker->randomNumber(),
+                ->post('http://192.168.120.231:3325/api/citas',[
+/*                      'mascota_id' => $faker->randomNumber(),
                         'veterinario_id' => $faker->randomNumber(),
-                        'clinica_id' => $faker->randomNumber(),
-                        'fecha_cita' => $faker->dateTimeBetween('now', '+1 year')->format('Y-m-d H:i:s'),
+                        'clinica_id' => $faker->randomNumber(), */
+                        'fecha_cita' => $faker->date
                 ]);
             $datas = $response->json();
         $request->validate([
@@ -58,7 +92,7 @@ class AreaController extends Controller
 
         return response()->json([
             'areas' => $areas,
-            'duenos' => $datas //respuesta del sig appi
+            'cita' => $datas //respuesta del sig appi
         ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -70,86 +104,63 @@ class AreaController extends Controller
     {
         if ($id) {
             //lógica para acceder al sig api
-                // Obtén el valor del encabezado Authorization
-                $authHeader = $request->header('Authorization');
-
-                // Verifica si el encabezado está presente
-                if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
-                }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
-                $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
-                if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
-                }
-        
-                // Accede al campo 'token2'
-                $token2 = $tokenRecord->token2;
-
-        $response = Http::withToken($token2)
-            ->timeout(80)
-        //read a la sig appi
-            ->get('http://192.168.118.187:3325/citas/'.$id,[
-        ]);
-
-        $datas = $response->json();
-
-        //this appi
-            $areas = Area::find($id);
-            if (!$areas) {
-                return response()->json(['message' => 'No encontrado'], 404);
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader) {
+                return response()->json(['message' => 'Authorization header not found'], 401);
             }
-        } else {
-            $areas = Area::all();
-        }
+            $token = str_replace('Bearer ', '', $authHeader);
+            $tokenRecord = Token::where('token1', $token)->first();
+            if (!$tokenRecord) {
+                return response()->json(['message' => 'Token not found'], 404);
+            }
+            $token2 = $tokenRecord->token2;
+
+            $response = Http::withToken($token2)
+                ->timeout(80)
+            //read a la sig appi
+                ->get('http://192.168.120.231:3325/api/citas/'.$id,[
+            ]);
+
+            $datas = $response->json();
+
+            //this appi
+                $areas = Area::find($id);
+                if (!$areas) {
+                    return response()->json(['message' => 'No encontrado'], 404);
+                }
+            } else {
+                $areas = Area::all();
+            }
     
         return response()->json([
             'areas' => $areas,
-            'citas' => $datas //respuesta del sig appi
+            'api/citas' => $datas //respuesta del sig appi
         ], 200);
     }
     
     public function update(Request $request, $id)
     {
-        //sig appi acceso
-    $faker= Faker::create();
-                // Obtén el valor del encabezado Authorization
-                $authHeader = $request->header('Authorization');
+        $faker= Faker::create();
+        $authHeader = $request->header('Authorization');
+        if (!$authHeader) {
+            return response()->json(['message' => 'Authorization header not found'], 401);
+        }
+        $token = str_replace('Bearer ', '', $authHeader);
+        $tokenRecord = Token::where('token1', $token)->first();
+        if (!$tokenRecord) {
+            return response()->json(['message' => 'Token not found'], 404);
+        }
+        $token2 = $tokenRecord->token2;
 
-                // Verifica si el encabezado está presente
-                if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
-                }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
-                $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
-                if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
-                }
-        
-                // Accede al campo 'token2'
-                $token2 = $tokenRecord->token2;
-    //sig appi petición
-    $response = Http::withToken($token2)
-        ->timeout(80)
-        ->put('http://192.168.118.187:3325/citas/'.$id.'/editar',[
-
-            'mascota_id' => $faker->randomNumber(),
-            'veterinario_id' => $faker->randomNumber(),
-            'clinica_id' => $faker->randomNumber(),
-            'fecha_cita' => $faker->dateTimeBetween('now', '+1 year')->format('Y-m-d H:i:s'),
-        ]);
+        //sig appi petición
+        $response = Http::withToken($token2)
+            ->timeout(80)
+            ->put('http://192.168.120.231:3325/api/citas/'.$id,[
+/*                 'mascota_id' => $faker->randomNumber(),
+                'veterinario_id' => $faker->randomNumber(),
+                'clinica_id' => $faker->randomNumber(), */
+                'fecha_cita' => $faker->date
+            ]);
     $datas = $response->json();
 
     //this appi
@@ -161,40 +172,30 @@ class AreaController extends Controller
     public function delete($id, Request $request)
     {
         try {
-                // Obtén el valor del encabezado Authorization
-                $authHeader = $request->header('Authorization');
-
-                // Verifica si el encabezado está presente
-                if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
-                }
-        
-                // Extrae el token Bearer del encabezado
-                $token = str_replace('Bearer ', '', $authHeader); // Esto elimina la parte 'Bearer ' y deja solo el token
-        
-                // Ahora puedes usar este token para buscar en tu base de datos
-                $tokenRecord = Token::where('token1', $token)->first();
-        
-                // Verifica si el token fue encontrado
-                if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
-                }
-        
-                // Accede al campo 'token2'
-                $token2 = $tokenRecord->token2;
+            $faker= Faker::create();
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader) {
+                return response()->json(['message' => 'Authorization header not found'], 401);
+            }
+            $token = str_replace('Bearer ', '', $authHeader);
+            $tokenRecord = Token::where('token1', $token)->first();
+            if (!$tokenRecord) {
+                return response()->json(['message' => 'Token not found'], 404);
+            }
+            $token2 = $tokenRecord->token2;
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.118.187:3325/citas/'.$id,[
+                ->delete('http://192.168.120.231:3325/api/citas/'.$id,[
                 ]);
             $datas = $response->json();
 
-        $areas = Area::find($id);
-        $areas->delete();
-        return response()->json(['message' => 'Eliminado'], 204);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json(['errors' => $e->validator->errors()], 422);
-}
+            $areas = Area::find($id);
+            $areas->delete();
+            return response()->json(['message' => 'Eliminado'], 204);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->validator->errors()], 422);
+        }
     }
 }
 

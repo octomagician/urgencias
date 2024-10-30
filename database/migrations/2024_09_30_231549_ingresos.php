@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('motivo_ingreso');
             $table->date('fecha_alta')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('pacientes_id')->references('id')->on('pacientes');
             $table->foreign('diagnostico_id')->references('id')->on('diagnosticos');

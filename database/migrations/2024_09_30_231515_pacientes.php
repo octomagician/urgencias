@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('direccion', 100);
             $table->string('tel_1', 20);
             $table->string('tel_2', 20) ->nullable();
+            $table->softDeletes();
 
             $table->foreign('persona_id')->references('id')->on('personas');
         });
