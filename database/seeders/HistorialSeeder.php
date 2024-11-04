@@ -28,6 +28,6 @@ class HistorialSeeder extends Seeder
      */
     public function run()
     {
-        Historial::factory(300)->create();
+        Historial::factory(150)->create();
     }
 }

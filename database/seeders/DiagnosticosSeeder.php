@@ -28,6 +28,6 @@ class DiagnosticosSeeder extends Seeder
      */
     public function run()
     {
-        Diagnostico::factory(30)->create();
+        Diagnostico::factory(15)->create();
     }
 }

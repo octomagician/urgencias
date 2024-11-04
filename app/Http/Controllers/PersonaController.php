@@ -8,16 +8,16 @@ use Illuminate\Http\Request;
 use Faker\Factory as Faker;
 use App\Models\Token;
 use Illuminate\Support\Facades\Http;
+use Exception;
 
 
 //visitas
 class PersonaController extends Controller
 {
 
-	public function index()
+	public function index(Request $request)
     {
         try { 
-			$faker= Faker::create();
 			$authHeader = $request->header('Authorization');
 			if (!$authHeader) {
 				return response()->json(['message' => 'Authorization header not found'], 401);
@@ -32,8 +32,14 @@ class PersonaController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/visitas/index',[
+				->get('http://192.168.117.230:3325/api/visitas',[
 			]);
+
+            if (!$response->successful()) {
+                $errorBody = $response->json();
+                $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                throw new Exception("Error detectado en la sig API: " . $errorMessage);
+            }
 
 			$datas = $response->json();
 
@@ -66,32 +72,36 @@ class PersonaController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/visitas',[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
-                    
+                ->post('http://192.168.117.230:3325/api/visitas',[                    
                     'fecha' => $faker->date(),
                     'motivo' => $faker->sentence(6), 
                     'mascota_id' => $faker->randomNumber(),   
                 ]);
                 
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
+
             $datas = $response->json();
 
-            $validatedData = $request->validate([
+            $persona = $request->validate([
                 'nombre' => 'required|max:35',
                 'apellido_paterno' => 'required|max:35',
                 'apellido_materno' => 'required|max:35',
                 'sexo' => 'required|in:M,F',
             ]);
 
-            Persona::create($validatedData);
+            Persona::create($persona);
 
             return response()->json([
-                'persona' => $persona,],
-                201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
-        }
+                'persona' => $persona,
+                'visitas' => $datas
+            ], 201);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error con el recurso', 'error' => $e->getMessage()], 500);
+            }
     }
 
     public function read($id = null, Request $request)
@@ -113,18 +123,21 @@ class PersonaController extends Controller
                 $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.120.231:3325/api/visitas/'.$id,[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                    ->get('http://192.168.117.230:3325/api/visitas/'.$id,[
                 ]);
+
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
         
                 $datas = $response->json();
         
                 //this appi
-                $persona = Persona::with([
-                    'nombre', 'apellido_paterno', 
-                    'apellido_materno','sexo'
-                    ])->find($id);
+
+
+                    $persona = Persona::find($id);
                 
                 if (!$persona) {
                     return response()->json(['message' => 'Persona no encontrado'], 404);
@@ -159,17 +172,22 @@ class PersonaController extends Controller
             //sig appi petición
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/visitas/'.$id,[
+                ->put('http://192.168.117.230:3325/api/visitas/'.$id,[
                     'fecha' => $faker->date(),
                     'motivo' => $faker->sentence(6), 
                     'mascota_id' => $faker->randomNumber(), 
                 ]);
+
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
+
             $datas = $response->json();
         
             //this appi
-            $request->validate([
-                'tipo_id' => 'required|exists:tipos_de_personal,id',
-            ]);
+
         
             $persona = Persona::find($id);
             if (!$persona) {
@@ -187,7 +205,7 @@ class PersonaController extends Controller
         }  
     }
 
-    public function delete(Persona $persona, Request $request)
+    public function delete($id, Request $request)
     {
         try {
             $faker= Faker::create();
@@ -204,8 +222,15 @@ class PersonaController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/visitas/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/visitas/'.$id,[
                 ]);
+
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
+
             $datas = $response->json();
     
         $persona = Persona::find($id);
@@ -214,8 +239,8 @@ class PersonaController extends Controller
         }
         $persona->delete();
         return response()->json(['message' => 'Persona eliminado'], 204);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
-        }
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error con el recurso', 'error' => $e->getMessage()], 500);
+    }
     }
 }

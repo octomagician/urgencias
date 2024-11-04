@@ -28,6 +28,6 @@ class EstudiosSeeder extends Seeder
      */
     public function run()
     {
-        Estudio::factory(150)->create();
+        Estudio::factory(100)->create();
     }
 }

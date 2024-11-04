@@ -28,6 +28,6 @@ class TiposDeEstudiosSeeder extends Seeder
      */
     public function run()
     {
-        TiposDeEstudio::factory(50)->create();
+        TiposDeEstudio::factory(25)->create();
     }
 }

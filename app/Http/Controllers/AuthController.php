@@ -8,70 +8,118 @@ use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\TokenController;
 use App\Models\Token;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+
+use App\Mail\RegistroCorreo;
+use App\Mail\RegistroCorreoAdmin;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountActivationMail;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    /**
-     * Handle login request and return the user with a Sanctum token.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login(Request $request)
     {
-        try { 
-            $register = Http::withOptions([
-                'verify' => false,
-            ])->post('http://192.168.118.187:3325/login', [
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Credenciales inválidas',
+            ], 401);
+        }
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error',
+                'error' => $validator->errors()
             ]);
-            $node1 = $register->json();
+        }
 
-            $token2 = $node1['token_2'];
-            $token3 = $node1['token_3'];
+        $user = Auth::user();
 
-            // Validar los campos del formulario de login
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required',
-            ]);
+        if ($user->email_verified_at === null) { 
+            return response()->json(['message' => 'Cuenta no activada'], 403);
+        }
+    
+        $token = $user->createToken('auth_token')->plainTextToken;   
+        $token = Token::updateOrCreate(
+            ['token1' => $token], 
+            ['token2' => 'null']
+        );
 
-            // Intentar autenticar al usuario con las credenciales proporcionadas
-            if (!Auth::attempt($request->only('email', 'password'))) {
-                return response()->json([
-                    'message' => 'Credenciales inválidas',
-                ], 401);
+        return response()->json([
+            'message' => 'Autenticación exitosa',
+            'token1' => $token
+        ]); 
+    }
+
+    public function activateAccount(Request $request, User $user)
+    {
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'La cuenta ya está activada'], 400);
+        }
+    
+        try {
+            DB::beginTransaction();
+    
+            $user->markEmailAsVerified();
+    
+            $adminEmail = User::where('role', 'Administrador')->first()->email;
+            Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));
+    
+            DB::commit();
+    
+            return response()->json(['message' => 'Cuenta activada exitosamente']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al activar cuenta: " . $e->getMessage());
+            return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
+        }
+    }
+
+    public function resendActivation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|min:8'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error en la validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+
+            if ($user->email_verified_at !== null) {
+                return response()->json(['message' => 'La cuenta ya está activada'], 400);
             }
-
-            // Obtener el usuario autenticado
-            $user = Auth::user();
-
-            // Eliminar tokens antiguos si es necesario
-            $user->tokens()->delete();
-
-            // Crear un nuevo token de acceso para el usuario
-            $token = $user->createToken('auth_token')->plainTextToken;   
-            Http::withOptions([
-                'verify' => false,
-            ])->post('http://192.168.118.187:3325/token-command', [
-                'token2' => $token2,
-                'token3' => $token3
-            ]);
             
-            // Actualiza o crea el registro del token según token1
-            $token = Token::updateOrCreate(
-                ['token1' => $token],  // Buscar por token1
-                ['token2' => $token2]   // Actualizar o crear con token2
+            $signedUrl = URL::temporarySignedRoute(
+                'activate.account',
+                Carbon::now()->addMinutes(5),
+                ['user' => $user->id]
             );
 
-            // Retornar la respuesta con el token
-            return response()->json([
-                //'message' => 'Autenticación exitosa',
-                'token1' => $token
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }  
+            Mail::to($user->email)->send(new RegistroCorreo($user, 'Confirmación requerida', $signedUrl));
+
+            return response()->json(['message' => 'Correo de activación reenviado']);
+        }
+        else 
+        {  
+            return response()->json(['message' => 'Credenciales inválidas'], 422);
+        }
     }
 }

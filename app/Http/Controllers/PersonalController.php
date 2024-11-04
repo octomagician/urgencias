@@ -14,6 +14,8 @@ use Faker\Factory as Faker;
 use App\Models\Token;
 use Illuminate\Support\Facades\Http;
 
+use Exception;
+
 //clinica veterinarias
 class PersonalController extends Controller
 {
@@ -36,7 +38,7 @@ class PersonalController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/clinicas/index',[
+				->get('http://192.168.117.230:3325/api/clinicas/index',[
 			]);
 
 			$datas = $response->json();
@@ -70,7 +72,7 @@ class PersonalController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/clinicas',[
+                ->post('http://192.168.117.230:3325/api/clinicas',[
 
                     'nombre' => $faker->name,
                     'direccion' => $faker->numberBetween,
@@ -142,7 +144,7 @@ public function read($id = null, Request $request)
             $response = Http::withToken($token2)
                 ->timeout(80)
             //read a la sig appi
-                ->get('http://192.168.120.231:3325/api/clinicas/'.$id,[]);
+                ->get('http://192.168.117.230:3325/api/clinicas/'.$id,[]);
 
             $datas = $response->json();
 
@@ -182,7 +184,7 @@ public function update(Request $request, $id)
         //sig appi petición
         $response = Http::withToken($token2)
             ->timeout(80)
-            ->put('http://192.168.120.231:3325/api/clinicas/'.$id,[
+            ->put('http://192.168.117.230:3325/api/clinicas/'.$id,[
                 'nombre' => $faker->firstName,
                 'edad' => $faker->numberBetween(1, 10),
             ]);
@@ -225,7 +227,7 @@ public function delete($id, Request $request)
 
         $response = Http::withToken($token2)
             ->timeout(80)
-            ->delete('http://192.168.120.231:3325/api/clinicas/'.$id,[
+            ->delete('http://192.168.117.230:3325/api/clinicas/'.$id,[
             ]);
         $datas = $response->json();
 

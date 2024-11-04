@@ -27,18 +27,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        //creando datos no mas así
-        // \App\Models\User::factory(10)->create();
-
-        // creando datos ya más específicos
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
         //hilo de seeders que quiero que se ejecuten
         $this->call([
-            
+
+            RoleSeeder::class, 
+            AdminSeeder::class,
             PacientesSeeder::class,
             
             TiposDePersonalSeeder::class,
@@ -54,21 +47,5 @@ class DatabaseSeeder extends Seeder
             EstudiosSeeder::class,
             HistorialSeeder::class,
         ]);
-        
-        /*
-        $this->call([
-            UsersSeeder::class,
-            PersonasSeeder::class, 
-            PacientesSeeder::class,
-            TiposDePersonalSeeder::class,
-            PersonalSeeder::class,
-            TiposDeEstudiosSeeder::class,
-            AreasSeeder::class,
-            DiagnosticosSeeder::class,
-            IngresosSeeder::class,
-            EstudiosSeeder::class,
-            HistorialSeeder::class,
-        ]);
-        */
     }
 }

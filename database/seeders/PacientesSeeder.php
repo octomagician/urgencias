@@ -28,6 +28,6 @@ class PacientesSeeder extends Seeder
      */
     public function run()
     {
-        Paciente::factory(60)->create(); 
+        Paciente::factory(30)->create(); 
     }
 }

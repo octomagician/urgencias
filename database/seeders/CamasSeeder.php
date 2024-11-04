@@ -28,6 +28,6 @@ class CamasSeeder extends Seeder
      */
     public function run()
     {
-        Cama::factory(50)->create();
+        Cama::factory(25)->create();
     }
 }

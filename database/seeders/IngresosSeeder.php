@@ -28,6 +28,6 @@ class IngresosSeeder extends Seeder
      */
     public function run()
     {
-        Ingreso::factory(100)->create(); 
+        Ingreso::factory(50)->create(); 
     }
 }

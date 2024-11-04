@@ -6,45 +6,79 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use Illuminate\Support\Facades\Http;
+
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\Token;
 
-//users
+use Exception; //para el trycatch
+
+//para el correo con ruta firmada
+use App\Mail\RegistroCorreo;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountActivationMail;
+
+//para los roles de usuario
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+
 class UserController extends Controller
 { 
-    public function create(/* RegisterUser */Request $request)
+    use Notifiable, HasRoles;
+
+    public function create(Request $request)
     {
-        try { 
-            $register = Http::withOptions([
-                'verify' => false,
-            ])->post('http://192.168.120.231:3325/register', [                         
-                'email' => $request->input('email'),
-                'password' => $request->input('password'),
-            ]);
-            $node1=$register->json();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'role' => 'required|in:user,administrador,guest',
+            'email' => 'required|string|email|unique:users,email',
+            'password' => 'required|string|min:8',
+        ]);
         
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required | string | email|unique:users,email',
-                'password' => 'required|string|min:8'
-            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Error en la validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-            $user = User::create([ //se hace por separado y no con all para hashear la clave
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password) 
-            ]);
+        $user = User::create([
+            'name' => $request->name,
+            'role' => $request->role,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
+        ]);
 
-            return response()->json([
-                'message' => 'Usuario creado',
-                'user' => $user,
-                'node' => $node1], 201 );   
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        }    
-    }
+        $user->assignRole($request->role);
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'No se pudo crear el usuario'
+                ], 500);
+            }
+
+            if (isset($user)) { 
+
+                $signedUrl = URL::temporarySignedRoute(
+                    'activate.account', // nombre de la ruta
+                    Carbon::now()->addMinutes(5),
+                    ['user' => $user->id]
+                );
+
+                Mail::to($user->email)->send(new RegistroCorreo($user, 'Registro exitoso', $signedUrl));
+                
+                return response()->json([
+                    'message' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
+                    'user' => $user,
+                ], 201);
+            }
+        }
 
     public function read($id = null)
     {

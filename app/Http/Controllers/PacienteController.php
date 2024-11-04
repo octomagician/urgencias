@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Faker\Factory as Faker;
+use Exception;
 
 //mascotas
 class PacienteController extends Controller
@@ -34,7 +35,7 @@ class PacienteController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/mascotas/index',[
+				->get('http://192.168.117.230:3325/api/mascotas/index',[
 			]);
 
 			$datas = $response->json();
@@ -68,7 +69,7 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->post('http://192.168.120.231:3325/api/mascotas', [
+                ->post('http://192.168.117.230:3325/api/mascotas', [
                     'emails' => $request->input('emails'),
                     'password' => $request->input('passwords'),
                     'nombre' => $faker->name,
@@ -87,6 +88,11 @@ class PacienteController extends Controller
                         'descripcion' => $faker->sentence,
                     ]
                 ]);
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
 
             $datas = $response->json();
 
@@ -135,8 +141,8 @@ class PacienteController extends Controller
                 'paciente' => $paciente,
                 'mascotas' => $datas
             ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error con el recurso', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -160,8 +166,14 @@ class PacienteController extends Controller
                 $response =  Http::withOptions(['verify' => false])
                     ->withToken($token2)
                     ->timeout(80)
-                    ->get('http://192.168.120.231:3325/api/mascotas/' . $id, [
+                    ->get('http://192.168.117.230:3325/api/mascotas/' . $id, [
                     ]);
+
+                    if (!$response->successful()) {
+                        $errorBody = $response->json();
+                        $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                        throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                    }
 
                 $datas = $response->json();
 
@@ -200,10 +212,16 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/mascotas/' . $id, [
+                ->put('http://192.168.117.230:3325/api/mascotas/' . $id, [
                     'nombre' => $faker->firstName,
                     'edad' => $faker->numberBetween(1, 10),
                 ]);
+
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
 
             $datas = $response->json();
 
@@ -252,15 +270,23 @@ class PacienteController extends Controller
             $response =  Http::withOptions(['verify' => false])
                 ->withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/mascotas/' . $id, [
+                ->delete('http://192.168.117.230:3325/api/mascotas/' . $id, [
                 ]);
 
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+        
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
+
             $datas = $response->json();
+
             $px = Paciente::find($id);
             $px->delete();
             return response()->json(204);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al eliminar el recurso', 'error' => $e->getMessage()], 500);
         }
     }
 }

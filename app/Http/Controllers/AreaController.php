@@ -29,7 +29,7 @@ class AreaController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/citas/index',[
+				->get('http://192.168.117.230:3325/api/citas/index',[
 			]);
 
 			$datas = $response->json();
@@ -75,7 +75,7 @@ class AreaController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/citas',[
+                ->post('http://192.168.117.230:3325/api/citas',[
 /*                      'mascota_id' => $faker->randomNumber(),
                         'veterinario_id' => $faker->randomNumber(),
                         'clinica_id' => $faker->randomNumber(), */
@@ -118,7 +118,7 @@ class AreaController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
             //read a la sig appi
-                ->get('http://192.168.120.231:3325/api/citas/'.$id,[
+                ->get('http://192.168.117.230:3325/api/citas/'.$id,[
             ]);
 
             $datas = $response->json();
@@ -155,7 +155,7 @@ class AreaController extends Controller
         //sig appi petición
         $response = Http::withToken($token2)
             ->timeout(80)
-            ->put('http://192.168.120.231:3325/api/citas/'.$id,[
+            ->put('http://192.168.117.230:3325/api/citas/'.$id,[
 /*                 'mascota_id' => $faker->randomNumber(),
                 'veterinario_id' => $faker->randomNumber(),
                 'clinica_id' => $faker->randomNumber(), */
@@ -186,7 +186,7 @@ class AreaController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/citas/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/citas/'.$id,[
                 ]);
             $datas = $response->json();
 

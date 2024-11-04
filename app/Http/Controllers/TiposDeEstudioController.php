@@ -9,6 +9,8 @@ use Faker\Factory as Faker;
 use App\Models\Token;
 use Illuminate\Support\Facades\Http;
 
+use Exception;
+
 //vacunas
 class TiposDeEstudioController extends Controller
 {
@@ -31,9 +33,13 @@ class TiposDeEstudioController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/vacunas/index',[
+				->get('http://192.168.117.230:3325/api/vacunas/index',[
 			]);
-
+            if (!$response->successful()) {
+                $errorBody = $response->json();
+                $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                throw new Exception("Error detectado en la sig API: " . $errorMessage);
+            }
 			$datas = $response->json();
 
 			$tipo_de_estudio = TiposDeEstudio::all();
@@ -65,14 +71,16 @@ class TiposDeEstudioController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/vacunas',[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
-
+                ->post('http://192.168.117.230:3325/api/vacunas',[
                     'nombre' => $faker->word,
                     'descripcion' => $faker->sentence(10),
                     'dosis' => $faker->randomNumber(2) . ' mg'
                 ]);
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
             $datas = $response->json();
 
             $request->validate([
@@ -89,8 +97,8 @@ class TiposDeEstudioController extends Controller
             ], 201);
 
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error con el recurso', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -113,11 +121,13 @@ class TiposDeEstudioController extends Controller
                 $response = Http::withToken($token2)
                     ->timeout(80)
                     //read a la sig appi
-                    ->get('http://192.168.120.231:3325/api/vacunas/'.$id,[
-                    'email' => $request->input('email'),
-                    'password' => $request->input('password'),
+                    ->get('http://192.168.117.230:3325/api/vacunas/'.$id,[
                 ]);
-
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
                 $datas = $response->json();
 
                 //this appi
@@ -156,7 +166,7 @@ class TiposDeEstudioController extends Controller
             //sig appi petición
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/vacunas/'.$id,[
+                ->put('http://192.168.117.230:3325/api/vacunas/'.$id,[
             
                     'nombre' => $faker->word,
                     'descripcion' => $faker->sentence(10),
@@ -198,8 +208,15 @@ class TiposDeEstudioController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/vacunas/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/vacunas/'.$id,[
                 ]);
+                
+                if (!$response->successful()) {
+                    $errorBody = $response->json();
+                    $errorMessage = $errorBody['message'] ?? 'Error desconocido';
+                    throw new Exception("Error detectado en la sig API: " . $errorMessage);
+                }
+
             $datas = $response->json();
 
             $tipo_de_estudio = TiposDeEstudio::find($id);
@@ -209,8 +226,8 @@ class TiposDeEstudioController extends Controller
 
             $tipo_de_estudio->delete();
             return response()->json(['message' => 'Eliminado'], 204);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->validator->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error con el recurso', 'error' => $e->getMessage()], 500);
         }
     }
 }

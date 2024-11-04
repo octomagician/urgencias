@@ -32,7 +32,7 @@ class EstudiosController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/razas/index',[
+				->get('http://192.168.117.230:3325/api/razas/index',[
 			]);
 
 			$datas = $response->json();
@@ -66,7 +66,7 @@ class EstudiosController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/razas',[
+                ->post('http://192.168.117.230:3325/api/razas',[
                         'email' => $request->input('email'),
                         'password' => $request->input('password'),
 
@@ -110,7 +110,7 @@ class EstudiosController extends Controller
                 $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.120.231:3325/api/razas/'.$id,[
+                    ->get('http://192.168.117.230:3325/api/razas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -153,7 +153,7 @@ class EstudiosController extends Controller
             //sig appi petición
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/razas/'.$id,[
+                ->put('http://192.168.117.230:3325/api/razas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
 
@@ -197,7 +197,7 @@ class EstudiosController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/razas/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/razas/'.$id,[
                 ]);
             $datas = $response->json();
 

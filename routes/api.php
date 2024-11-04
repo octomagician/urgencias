@@ -22,17 +22,6 @@ use App\Http\Controllers\EstudiosController;
 
 use App\Http\Controllers\Auth\SanctumController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-//ruta de hola
 Route::get('', function () {
     return response()->json([
         'message' => 'Sistema de urgenicas de Grey Sloan Memorial',
@@ -40,31 +29,39 @@ Route::get('', function () {
 });
 
 
-Route::post('login', [AuthController::class, 'login']);
 Route::post('user', [UserController::class, 'create']);
+
+Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
+    ->name('activate.account')
+    ->middleware('signed'); //para verificar si el enlace es válido
+
+Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
+
+Route::post('login', [AuthController::class, 'login']);
 Route::post('token-command', [TokenController::class, 'store']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    
     // users
-    // create está fuera del middleware
+    // create está fuera
     Route::get('user/', [UserController::class, 'index']);
     Route::get('user/{id?}', [UserController::class, 'read'])
     -> where('id', '[0-9]+');
     Route::put('user/{id}', [UserController::class, 'update'])
     -> where('id', '[0-9]+');
     Route::delete('user/{id}', [UserController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
    
     //personas
-    Route::get('personas/', [PersonaController::class, 'index']);
+    Route::get('personas', [PersonaController::class, 'index']);
     Route::post('personas', [PersonaController::class, 'create']);
-    Route::get('personas/{id?}', [PersonaController::class, 'read'])
+    Route::get('personas/{id}', [PersonaController::class, 'read'])
     -> where('id', '[0-9]+');
     Route::put('personas/{id}', [PersonaController::class, 'update'])
     -> where('id', '[0-9]+');
     Route::delete('personas/{id}', [PersonaController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //pacientes
     Route::get('pacientes/', [PacienteController::class, 'index']);
@@ -74,7 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('pacientes/{id}', [PacienteController::class, 'update'])
     -> where('id', '[0-9]+');
     Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //personal
     Route::get('personal/', [PersonalController::class, 'index']);
@@ -84,45 +82,58 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('personal/{id}', [PersonalController::class, 'update'])
     -> where('id', '[0-9]+');
     Route::delete('personal/{id}', [PersonalController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //tipos de personal
     Route::get('tipos-de-personal/', [TiposDePersonalController::class, 'index']);
-    Route::post('tipos-de-personal', [TiposDePersonalController::class, 'create']);
+    Route::post('tipos-de-personal', [TiposDePersonalController::class, 'create'])
+    ->middleware('role:Administrador'); 
     Route::get('tipos-de-personal/{id?}', [TiposDePersonalController::class, 'read'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+'); 
     Route::put('tipos-de-personal/{id}', [TiposDePersonalController::class, 'update'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
     Route::delete('tipos-de-personal/{id}', [TiposDePersonalController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //area
-    Route::post('area', [AreaController::class, 'create']);
+    Route::post('area', [AreaController::class, 'create'])
+    ->middleware('role:Administrador'); 
     Route::get('area/{id?}', [AreaController::class, 'read'])
     -> where('id', '[0-9]+');
     Route::put('area/{id}', [AreaController::class, 'update'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
     Route::delete('area/{id}', [AreaController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //cama
     Route::get('cama', [CamaController::class, 'index']);
-    Route::post('cama', [CamaController::class, 'create']);
+    Route::post('cama', [CamaController::class, 'create'])
+    ->middleware('role:Administrador'); 
     Route::get('cama/{id?}', [CamaController::class, 'read'])
     -> where('id', '[0-9]+');
     Route::put('cama/{id}', [CamaController::class, 'update'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
     Route::delete('cama/{id}', [CamaController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //tipos de estudio
-    Route::post('tipos-de-estudio', [TiposDeEstudioController::class, 'create']);
+    Route::post('tipos-de-estudio', [TiposDeEstudioController::class, 'create'])
+    ->middleware('role:Administrador'); 
     Route::get('tipos-de-estudio/{id?}', [TiposDeEstudioController::class, 'read'])
     -> where('id', '[0-9]+');
     Route::put('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'update'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
     Route::delete('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'delete'])
-    -> where('id', '[0-9]+');
+    -> where('id', '[0-9]+')
+    ->middleware('role:Administrador'); 
 
     //estudios
     Route::post('estudios', [EstudiosController::class, 'create']);

@@ -34,7 +34,7 @@ class IngresoController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/consultas/index',[
+				->get('http://192.168.117.230:3325/api/consultas/index',[
 			]);
 
 			$datas = $response->json();
@@ -68,7 +68,7 @@ class IngresoController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/consultas',[
+                ->post('http://192.168.117.230:3325/api/consultas',[
                         'email' => $request->input('email'),
                         'password' => $request->input('password'),
                         'mascota_id' => $faker->randomNumber(), 
@@ -122,7 +122,7 @@ class IngresoController extends Controller
                 $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.120.231:3325/api/consultas/'.$id,[
+                    ->get('http://192.168.117.230:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -165,7 +165,7 @@ class IngresoController extends Controller
             //sig appi petición
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/consultas/'.$id,[
+                ->put('http://192.168.117.230:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                     'mascota_id' => $faker->randomNumber(), 
@@ -224,7 +224,7 @@ class IngresoController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/consultas/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);

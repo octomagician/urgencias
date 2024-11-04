@@ -28,6 +28,6 @@ class PersonalSeeder extends Seeder
      */
     public function run()
     {
-        Personal::factory(30)->create();
+        Personal::factory(15)->create();
     }
 }

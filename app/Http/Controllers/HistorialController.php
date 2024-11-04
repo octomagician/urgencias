@@ -33,7 +33,7 @@ class HistorialController extends Controller
 			$response = Http::withToken($token2)
 				->timeout(80)
 			//read a la sig appi
-				->get('http://192.168.120.231:3325/api/historiales/index',[
+				->get('http://192.168.117.230:3325/api/historiales/index',[
 			]);
 
 			$datas = $response->json();
@@ -67,7 +67,7 @@ class HistorialController extends Controller
             $response = Http::withToken($token2)
                 ->timeout(80)
                 //crear en la tabla de la sig api
-                ->post('http://192.168.120.231:3325/api/historiales',[
+                ->post('http://192.168.117.230:3325/api/historiales',[
                         'email' => $request->input('email'),
                         'password' => $request->input('password'),
 
@@ -122,7 +122,7 @@ class HistorialController extends Controller
                 $response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
-                    ->get('http://192.168.120.231:3325/api/historiales/'.$id,[
+                    ->get('http://192.168.117.230:3325/api/historiales/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                 ]);
@@ -165,7 +165,7 @@ class HistorialController extends Controller
             //sig appi petición
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->put('http://192.168.120.231:3325/api/historiales/'.$id,[
+                ->put('http://192.168.117.230:3325/api/historiales/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
                     'fecha_cita' => $faker->dateTimeBetween('now', '+1 year'),
@@ -222,7 +222,7 @@ class HistorialController extends Controller
     
             $response = Http::withToken($token2)
                 ->timeout(80)
-                ->delete('http://192.168.120.231:3325/api/historiales/'.$id,[
+                ->delete('http://192.168.117.230:3325/api/historiales/'.$id,[
                 ]);
             $datas = $response->json();
 
