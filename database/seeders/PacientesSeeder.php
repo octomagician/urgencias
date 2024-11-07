@@ -5,15 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Persona;
 use App\Models\Paciente;
-use App\Models\TiposDePersonal;
-use App\Models\Personal;
-use App\Models\TiposDeEstudio;
-use App\Models\Area;
-use App\Models\Ingreso;
-use App\Models\Estudio;
-use App\Models\Historial;
-use App\Models\Cama;
-use App\Models\Diagnostico;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -28,6 +19,16 @@ class PacientesSeeder extends Seeder
      */
     public function run()
     {
-        Paciente::factory(30)->create(); 
+        User::factory(30)->create()->each(function ($user) {
+            $user->assignRole('User'); 
+            
+            $persona = Persona::factory()->create([
+                'users_id' => $user->id,
+            ]);
+
+            Paciente::factory()->create([
+                'persona_id' => $persona->id,
+            ]);
+        });
     }
 }

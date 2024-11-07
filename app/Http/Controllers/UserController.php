@@ -28,6 +28,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
+use Illuminate\Support\Facades\Storage;
+
 class UserController extends Controller
 { 
     use Notifiable, HasRoles;
@@ -36,7 +38,7 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'role' => 'required|in:user,administrador,guest',
+            'requested_role' => 'required|in:user,administrador,guest',
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8',
         ]);
@@ -50,12 +52,12 @@ class UserController extends Controller
 
         $user = User::create([
             'name' => $request->name,
-            'role' => $request->role,
+            'requested_role' => $request->requested_role,
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
 
-        $user->assignRole($request->role);
+        $user->assignRole('guest');
 
             if (!$user) {
                 return response()->json([
@@ -131,4 +133,58 @@ class UserController extends Controller
         } 
     }
 
+    public function uploadPP(Request $request)
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+       $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        /* $user = Auth::user(); */
+
+        if ($user->profile_photo_path) {
+            Storage::disk('spaces')->delete($user->profile_photo_path);
+        }
+
+        $path = $request->file('photo')->store('profile_pictures', 'spaces');
+        $user->update(['profile_photo_path' => $path]);
+
+        $photoUrl = Storage::disk('spaces')->url($path);
+
+        return response()->json(['message' => 'Foto de perfil actualizada', 'photo_url' => $photoUrl]);
+    }
+
+    public function deletePP()
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+
+        if ($user->profile_photo_path) {
+            Storage::disk('spaces')->delete($user->profile_photo_path);
+            $user->update(['profile_photo_path' => null]);
+            return response()->json(['message' => 'Foto de perfil eliminada']);
+        }
+        return response()->json(['error' => 'No hay foto de perfil para eliminar'], 404);
+    }
+
+    public function downloadPP()
+    {
+        $user = Auth::user();
+
+        if (!$user->profile_photo_path || !Storage::disk('spaces')->exists($user->profile_photo_path)) {
+            return response()->json(['error' => 'Foto de perfil no encontrada'], 404);
+        }
+
+        $fileContent = Storage::disk('spaces')->get($user->profile_photo_path);
+
+        return response($fileContent)->header('Content-Type', 'image/png');
+    }
 }

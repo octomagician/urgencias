@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Validator;
 //para que jale el verificar roles de usuario
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Middlewares\RoleMiddleware;
+
+
+use Illuminate\Support\Facades\Log;
 
 
 //dueños
@@ -24,7 +28,7 @@ class TiposDePersonalController extends Controller
 
     public function __construct()
 {
-    $this->middleware('role:Administrador')->only(['create', 'update', 'delete']);
+    /* $this->middleware('role:Administrador')->only(['create', 'read']); */
 }
 
 
@@ -42,28 +46,50 @@ class TiposDePersonalController extends Controller
 
     public function create(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'nombre' => 'required|max:50',
-        ]);
+        Log::info('Entramos al método create');
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error en la validación',
-                'errors' => $validator->errors()
-            ], 422);
+        $user = Auth::user();
+        if (!$user) {
+            Log::error('Usuario no autenticado');
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
 
-        $tipo_de_personal = TiposDePersonal::create([
-            'nombre' => $request->nombre
-        ]);
+        //if ($user->hasRole('Administrador')) {
+            Log::info('El usuario tiene rol de Administrador');
 
-        return response()->json([
-            'tipos de personal' => $tipo_de_personal
-        ], 201);
+            $validator = Validator::make($request->all(), [
+                'nombre' => 'required|max:50',
+            ]);
+
+            if ($validator->fails()) {
+                Log::warning('Fallo en la validación', ['errors' => $validator->errors()]);
+                return response()->json([
+                    'message' => 'Error en la validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            Log::info('Pasamos la validación correctamente');
+
+            $tipo_de_personal = TiposDePersonal::create([
+                'nombre' => $request->nombre
+            ]);
+
+            Log::info('Tipo de personal creado exitosamente', ['tipo_de_personal' => $tipo_de_personal]);
+
+            return response()->json([
+                'tipos de personal' => $tipo_de_personal
+            ], 201);
+/*         } else {
+            Log::warning('El usuario no tiene permisos para crear tipos de personal');
+            return response()->json(['error' => 'Acceso denegado'], 403);
+        } */
     }
 
     public function read($id = null,Request $request)
     {
+        dd(auth()->user());
+        dd(auth()->user()->roles->pluck('name'));
         $tipo_de_personal = TiposDePersonal::find($id);
 
         return  response()->json([

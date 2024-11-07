@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
-
+use Spatie\Permission\Middlewares\RoleMiddleware;
 
 class User extends Authenticatable
 {
@@ -24,9 +24,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'role',
+        'requested_role',
         'email',
         'password',
+        'profile_photo_path',
     ];
 
     /**

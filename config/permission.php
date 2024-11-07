@@ -2,6 +2,10 @@
 
 return [
 
+    'defaults' => [
+    'guard' => 'web', // Esto debe coincidir con el guard de config/auth.php
+],
+
     'models' => [
 
         /*

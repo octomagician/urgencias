@@ -21,12 +21,8 @@ use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
 
 use App\Http\Controllers\Auth\SanctumController;
+use Spatie\Permission\Middlewares\RoleMiddleware;
 
-Route::get('', function () {
-    return response()->json([
-        'message' => 'Sistema de urgenicas de Grey Sloan Memorial',
-    ]);
-});
 
 
 Route::post('user', [UserController::class, 'create']);
@@ -37,21 +33,58 @@ Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
 
 Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
 
+Route::get('/authorize-user-role/{user}', [AuthController::class, 'authorizeUserRole'])
+    ->name('authorize.user.role')
+    /* ->middleware(['signed', 'auth:api']) */;
+
 Route::post('login', [AuthController::class, 'login']);
 Route::post('token-command', [TokenController::class, 'store']);
 
+// --------------------------------------------------------------------------------------------------------
+
 Route::middleware('auth:sanctum')->group(function () {
+    
+    
+    //------------------------ USER
+
+
+
+    //------------------------ ADMINISTRADOR
+/*     Route::group(['middleware' => ['role:Administrador']], function () {
+
+        Route::get('', function () {
+            return response()->json([
+                'message' => 'Sistema de urgenicas de Grey Sloan Memorial',
+            ]);
+        });
+        
+    }); */
+
+
+    Route::middleware(['role:Administrador'])->group(function () {
+/*         Route::get('', function () {
+            return response()->json([
+                'message' => 'Sistema de urgenicas de Grey Sloan Memorial',
+            ]);
+        }); */
+    });
+
     // users
     // create está fuera
-    Route::get('user/', [UserController::class, 'index']);
-    Route::get('user/{id?}', [UserController::class, 'read'])
-    -> where('id', '[0-9]+');
     Route::put('user/{id}', [UserController::class, 'update'])
     -> where('id', '[0-9]+');
     Route::delete('user/{id}', [UserController::class, 'delete'])
     -> where('id', '[0-9]+')
     ->middleware('role:Administrador'); 
-   
+    Route::get('user/{id?}', [UserController::class, 'read'])
+    -> where('id', '[0-9]+');
+    Route::get('user/', [UserController::class, 'index']);
+         // Foto de perfil
+    Route::get('user/p', [UserController::class, 'downloadPP']);
+    Route::post('user/p', [UserController::class, 'uploadPP']);
+    Route::delete('user/p', [UserController::class, 'deletePP']);
+
+
     //personas
     Route::get('personas', [PersonaController::class, 'index']);
     Route::post('personas', [PersonaController::class, 'create']);
@@ -87,16 +120,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //tipos de personal
     Route::get('tipos-de-personal/', [TiposDePersonalController::class, 'index']);
-    Route::post('tipos-de-personal', [TiposDePersonalController::class, 'create'])
-    ->middleware('role:Administrador'); 
+    Route::post('tipos-de-personal', [TiposDePersonalController::class, 'create']); 
     Route::get('tipos-de-personal/{id?}', [TiposDePersonalController::class, 'read'])
     -> where('id', '[0-9]+'); 
     Route::put('tipos-de-personal/{id}', [TiposDePersonalController::class, 'update'])
-    -> where('id', '[0-9]+')
-    ->middleware('role:Administrador'); 
+    -> where('id', '[0-9]+'); 
     Route::delete('tipos-de-personal/{id}', [TiposDePersonalController::class, 'delete'])
-    -> where('id', '[0-9]+')
-    ->middleware('role:Administrador'); 
+    -> where('id', '[0-9]+'); 
 
     //area
     Route::post('area', [AreaController::class, 'create'])

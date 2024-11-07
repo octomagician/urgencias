@@ -8,26 +8,24 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 use App\Models\User;
 use App\Models\Persona;
-use App\Models\Paciente;
+
 use App\Models\TiposDePersonal;
 use App\Models\Personal;
-use App\Models\TiposDeEstudio;
-use App\Models\Area;
-use App\Models\Ingreso;
-use App\Models\Estudio;
-use App\Models\Historial;
-use App\Models\Cama;
-use App\Models\Diagnostico;
 
 class PersonalSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        Personal::factory(15)->create();
+        User::factory(10)->create()->each(function ($user) {
+            $user->assignRole('User'); 
+            
+            $persona = Persona::factory()->create([
+                'users_id' => $user->id,
+            ]);
+    
+            Personal::factory()->create([
+                'persona_id' => $persona->id,
+            ]);
+        });
     }
 }

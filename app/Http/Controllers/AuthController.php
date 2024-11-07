@@ -64,7 +64,7 @@ class AuthController extends Controller
     public function activateAccount(Request $request, User $user)
     {
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'La cuenta ya está activada'], 400);
+            return response()->json(['message' => 'La cuenta ya está activada, favor de esperar a que el administrador le autorice su nivel de usuario.'], 400);
         }
     
         try {
@@ -72,7 +72,7 @@ class AuthController extends Controller
     
             $user->markEmailAsVerified();
     
-            $adminEmail = User::where('role', 'Administrador')->first()->email;
+            $adminEmail = User::role('Administrador')->first()->email;
             Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));
     
             DB::commit();
@@ -120,6 +120,33 @@ class AuthController extends Controller
         else 
         {  
             return response()->json(['message' => 'Credenciales inválidas'], 422);
+        }
+    }
+
+    public function authorizeUserRole(Request $request, User $user)
+    {
+/*         dd(auth()->user()->roles->pluck('name'));
+        dd(auth()->user()->getAllPermissions()->pluck('name'));
+        $adminRole = Spatie\Permission\Models\Role::findByName('Administrador');
+        dd($adminRole->permissions);
+
+        if (auth()->user()->cannot('authorize roles')) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        } */
+
+        try {
+            DB::beginTransaction();
+
+            $user->removeRole('guest'); 
+            $user->assignRole($user->requested_role);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Rol de usuario autorizado correctamente']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al autorizar rol de usuario: " . $e->getMessage());
+            return response()->json(['error' => 'Ocurrió un problema al autorizar el rol'], 500);
         }
     }
 }
