@@ -46,7 +46,7 @@ class TiposDePersonalController extends Controller
 
     public function create(Request $request)
     {
-        Log::info('Entramos al método create');
+/*         Log::info('Entramos al método create'); */
 
         $user = Auth::user();
         if (!$user) {
@@ -88,8 +88,8 @@ class TiposDePersonalController extends Controller
 
     public function read($id = null,Request $request)
     {
-        dd(auth()->user());
-        dd(auth()->user()->roles->pluck('name'));
+/*         dd(auth()->user());
+        dd(auth()->user()->roles->pluck('name')); */
         $tipo_de_personal = TiposDePersonal::find($id);
 
         return  response()->json([
@@ -112,7 +112,7 @@ class TiposDePersonalController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $faker= Faker::create();
+/*             $faker= Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
                 return response()->json(['message' => 'Authorization header not found'], 401);
@@ -139,7 +139,7 @@ class TiposDePersonalController extends Controller
                     throw new Exception("Error detectado en la sig API: " . $errorMessage);
                 }
 
-            $datas = $response->json();
+            $datas = $response->json(); */
 
             //this appi
             $tipo_de_personal = TiposDePersonal::find($id);
@@ -154,7 +154,7 @@ class TiposDePersonalController extends Controller
     public function delete($id,Request $request)
     {
         try {
-            $faker= Faker::create();
+            /* $faker= Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
                 return response()->json(['message' => 'Authorization header not found'], 401);
@@ -178,9 +178,9 @@ class TiposDePersonalController extends Controller
                 }
 
                 $datas = $response->json();
-
-            $randomTipoId = rand(1, 10);
-            Personal::where('tipo_id', $id)->update(['tipo_id' => $randomTipoId]);
+ */
+/*             $randomTipoId = rand(1, 10);
+            Personal::where('tipo_id', $id)->update(['tipo_id' => $randomTipoId]); */
 
             $tipo_de_personal = TiposDePersonal::find($id);
             if (!$tipo_de_personal) {

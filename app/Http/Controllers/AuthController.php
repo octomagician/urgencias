@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountActivationMail;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; 
 
 class AuthController extends Controller
 {
@@ -32,13 +32,13 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'message' => 'Credenciales inválidas',
+                'mensaje' => 'Credenciales inválidas',
             ], 401);
         }
         
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Error',
+                'mensaje' => 'Error',
                 'error' => $validator->errors()
             ]);
         }
@@ -46,25 +46,25 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if ($user->email_verified_at === null) { 
-            return response()->json(['message' => 'Cuenta no activada'], 403);
+            return response()->json(['mensaje' => 'Cuenta no activada'], 403);
         }
     
         $token = $user->createToken('auth_token')->plainTextToken;   
-        $token = Token::updateOrCreate(
+        /*$token = Token::updateOrCreate(
             ['token1' => $token], 
             ['token2' => 'null']
-        );
+        );*/
 
         return response()->json([
-            'message' => 'Autenticación exitosa',
-            'token1' => $token
+            'mensaje' => 'Autenticación exitosa',
+            'token' => $token
         ]); 
     }
 
     public function activateAccount(Request $request, User $user)
     {
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'La cuenta ya está activada, favor de esperar a que el administrador le autorice su nivel de usuario.'], 400);
+            return response()->json(['mensaje' => 'La cuenta ya está activada, favor de esperar a que el administrador le autorice su nivel de usuario.'], 400);
         }
     
         try {
@@ -77,10 +77,10 @@ class AuthController extends Controller
     
             DB::commit();
     
-            return response()->json(['message' => 'Cuenta activada exitosamente']);
+            return response()->json(['mensaje' => 'Cuenta activada exitosamente']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error al activar cuenta: " . $e->getMessage());
+            Log::error("Error al activar cuenta: " . $e->getmensaje());
             return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
         }
     }
@@ -94,7 +94,7 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Error en la validación',
+                'mensaje' => 'Error en la validación',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -104,22 +104,22 @@ class AuthController extends Controller
         if ($user && Hash::check($request->password, $user->password)) {
 
             if ($user->email_verified_at !== null) {
-                return response()->json(['message' => 'La cuenta ya está activada'], 400);
+                return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
             }
             
             $signedUrl = URL::temporarySignedRoute(
                 'activate.account',
-                Carbon::now()->addMinutes(5),
+                Carbon::now()->addMinutes(1),
                 ['user' => $user->id]
             );
 
             Mail::to($user->email)->send(new RegistroCorreo($user, 'Confirmación requerida', $signedUrl));
 
-            return response()->json(['message' => 'Correo de activación reenviado']);
+            return response()->json(['mensaje' => 'Correo de activación reenviado']);
         }
         else 
         {  
-            return response()->json(['message' => 'Credenciales inválidas'], 422);
+            return response()->json(['mensaje' => 'Credenciales inválidas'], 422);
         }
     }
 
@@ -131,22 +131,66 @@ class AuthController extends Controller
         dd($adminRole->permissions);
 
         if (auth()->user()->cannot('authorize roles')) {
-            return response()->json(['message' => 'No autorizado'], 403);
+            return response()->json(['mensaje' => 'No autorizado'], 403);
         } */
 
         try {
             DB::beginTransaction();
 
             $user->removeRole('guest'); 
-            $user->assignRole($user->requested_role);
+/*             $user->assignRole($user->requested_role); */
 
             DB::commit();
 
-            return response()->json(['message' => 'Rol de usuario autorizado correctamente']);
+            return response()->json(['mensaje' => 'Rol de usuario autorizado correctamente']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error al autorizar rol de usuario: " . $e->getMessage());
+            Log::error("Error al autorizar rol de usuario: " . $e->getmensaje());
             return response()->json(['error' => 'Ocurrió un problema al autorizar el rol'], 500);
         }
+    }
+
+    // -------------------------------------------------------------------
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['mensaje' => 'Sesión cerrada correctamente.'], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        // Obtener el usuario autenticado
+        $user = $request->user();
+    
+        // Validar los datos de entrada
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string', // Contraseña actual
+            'new_password' => 'required|string|min:8|confirmed', // Nueva contraseña
+        ]);
+    
+        // Si la validación falla, devolver errores
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+    
+        // Verificar que la contraseña actual sea correcta
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'La contraseña actual es incorrecta',
+            ], 401);
+        }
+    
+        // Actualizar la contraseña
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+    
+        // Devolver una respuesta exitosa
+        return response()->json([
+            'message' => 'Contraseña cambiada correctamente',
+        ], 200);
     }
 }

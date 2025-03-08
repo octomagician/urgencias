@@ -25,7 +25,7 @@ class RegistroCorreoAdmin extends Mailable
 
         $this->authorizationUrl = URL::temporarySignedRoute(
             'authorize.user.role',
-            Carbon::now()->addMinutes(5),
+            Carbon::now()->addMinutes(10),
             ['user' => $this->user->id]
         );
     }

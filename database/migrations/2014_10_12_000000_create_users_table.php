@@ -22,7 +22,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
-            $table->enum('requested_role', ['user', 'administrador', 'guest'])->nullable();
+/*             $table->enum('requested_role', ['user', 'administrador', 'guest'])->nullable(); */
             $table->string('profile_photo_path')->nullable();
         });
     }

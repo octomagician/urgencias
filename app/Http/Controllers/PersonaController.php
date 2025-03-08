@@ -10,8 +10,6 @@ use App\Models\Token;
 use Illuminate\Support\Facades\Http;
 use Exception;
 
-
-//visitas
 class PersonaController extends Controller
 {
 
