@@ -3,9 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-
-use App\Models\Historial;
-use App\Models\Personal;
 use App\Models\Persona;
 use App\Models\TiposDePersonal;
 
@@ -21,9 +18,12 @@ class PersonalFactory extends Factory
      */
     public function definition()
     {
+        // Obtener un tipo de personal existente de manera aleatoria
+        $tipoDePersonal = TiposDePersonal::inRandomOrder()->first();
+
         return [
-            'persona_id' => Persona::factory(), 
-            'tipo_id' => TiposDePersonal::factory(),
+            'persona_id' => Persona::factory(), // Crea una nueva persona o usa una existente
+            'tipo_id' => $tipoDePersonal ? $tipoDePersonal->id : TiposDePersonal::factory(), // Usa un tipo existente o crea uno nuevo si no hay
         ];
     }
 }

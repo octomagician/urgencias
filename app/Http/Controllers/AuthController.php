@@ -55,16 +55,19 @@ class AuthController extends Controller
             ['token2' => 'null']
         );*/
 
+        $role = $user->roles->first()->name;
+
         return response()->json([
             'mensaje' => 'Autenticación exitosa',
-            'token' => $token
+            'token' => $token,
+            'role' => $role
         ]); 
     }
 
     public function activateAccount(Request $request, User $user)
     {
         if ($user->hasVerifiedEmail()) {
-            return response()->json(['mensaje' => 'La cuenta ya está activada, favor de esperar a que el administrador le autorice su nivel de usuario.'], 400);
+            return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
         }
     
         try {
@@ -72,15 +75,18 @@ class AuthController extends Controller
     
             $user->markEmailAsVerified();
     
-            $adminEmail = User::role('Administrador')->first()->email;
-            Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));
+            $user->removeRole('guest'); 
+            $user->assignRole('Administrador');
+    
+            //$adminEmail = User::role('Administrador')->first()->email;
+            //Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));
     
             DB::commit();
     
             return response()->json(['mensaje' => 'Cuenta activada exitosamente']);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error al activar cuenta: " . $e->getmensaje());
+            Log::error("Error al activar cuenta: " . $e->getMessage());
             return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
         }
     }

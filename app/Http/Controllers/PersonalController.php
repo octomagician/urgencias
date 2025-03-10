@@ -460,5 +460,4 @@ public function actualizarPerfil(Request $request)
         ], 500);
     }
 }
-
 }

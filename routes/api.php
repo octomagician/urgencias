@@ -205,6 +205,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('v2/perfil', [PersonalController::class, 'perfil']);
         Route::put('v2/perfil', [PersonalController::class, 'actualizarPerfil']);
         Route::post('v2/resetPassword', [AuthController::class, 'resetPassword']);
+
+        Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
+        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
+        ->where('nss', '[0-9]{11}');
+        Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
+        ->where('nss', '[0-9]{11}');
         
         Route::delete('v2/logout', [AuthController::class, 'logout']);
     });

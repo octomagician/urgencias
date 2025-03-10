@@ -28,6 +28,10 @@ class TiposDePersonalSeeder extends Seeder
      */
     public function run()
     {
-        TiposDePersonal::factory(5)->create();
+        $nombresPosibles = ['Doctor', 'Enfermero', 'Administrativo', 'Técnico', 'Recepcionista'];
+
+        foreach ($nombresPosibles as $nombre) {
+            TiposDePersonal::firstOrCreate(['nombre' => $nombre]);
+        }
     }
 }
