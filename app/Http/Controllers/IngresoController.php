@@ -22,12 +22,12 @@ class IngresoController extends Controller
 			$faker= Faker::create();
 			$authHeader = $request->header('Authorization');
 			if (!$authHeader) {
-				return response()->json(['message' => 'Authorization header not found'], 401);
+				return response()->json(['mensaje' => 'Authorization header not found'], 401);
 			}
 			$token = str_replace('Bearer ', '', $authHeader);
 			$tokenRecord = Token::where('token1', $token)->first();
 			if (!$tokenRecord) {
-				return response()->json(['message' => 'Token not found'], 404);
+				return response()->json(['mensaje' => 'Token not found'], 404);
 			}
 			$token2 = $tokenRecord->token2;
 
@@ -46,7 +46,7 @@ class IngresoController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
+            return response()->json(['error' => $e->getmensaje()], 422);
         } 
     }
 
@@ -56,12 +56,12 @@ class IngresoController extends Controller
             $faker= Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
-                return response()->json(['message' => 'Authorization header not found'], 401);
+                return response()->json(['mensaje' => 'Authorization header not found'], 401);
             }
             $token = str_replace('Bearer ', '', $authHeader);
             $tokenRecord = Token::where('token1', $token)->first();
             if (!$tokenRecord) {
-                return response()->json(['message' => 'Token not found'], 404);
+                return response()->json(['mensaje' => 'Token not found'], 404);
             }
             $token2 = $tokenRecord->token2;
     
@@ -105,34 +105,35 @@ class IngresoController extends Controller
 
     public function read($id = null, Request $request)
     {
-        try { 
             if ($id) {
-                $faker= Faker::create();
+                //$faker= Faker::create();
                 $authHeader = $request->header('Authorization');
                 if (!$authHeader) {
-                    return response()->json(['message' => 'Authorization header not found'], 401);
+                    return response()->json(['mensaje' => 'Authorization header not found'], 401);
                 }
                 $token = str_replace('Bearer ', '', $authHeader);
+                //dd($token);
                 $tokenRecord = Token::where('token1', $token)->first();
                 if (!$tokenRecord) {
-                    return response()->json(['message' => 'Token not found'], 404);
+                    return response()->json(['mensaje' => 'Token not found'], 404);
                 }
-                $token2 = $tokenRecord->token2;
+                dd($tokenRecord);
+                //$token2 = $tokenRecord->token2;
 
-                $response = Http::withToken($token2)
+                /*$response = Http::withToken($token2)
                     ->timeout(80)
                 //read a la sig appi
                     ->get('http://192.168.117.230:3325/api/consultas/'.$id,[
                     'email' => $request->input('email'),
                     'password' => $request->input('password'),
-                ]);
+                ]);*/
 
-                $datas = $response->json();
+                //$datas = $response->json();
 
                 //this appi
                 $ingreso = Ingreso::find($id);
                 if (!$ingreso) {
-                    return response()->json(['message' => 'Ingreso no encontrado'], 404);
+                    return response()->json(['mensaje' => 'Ingreso no encontrado'], 404);
                 }
                 } else {
                     $ingreso = Ingreso::all();
@@ -140,11 +141,8 @@ class IngresoController extends Controller
             }
             return response()->json([
                 'ingreso' => $ingreso,
-                'consultas' => $datas //respuesta del sig appi
+                //'consultas' => $datas //respuesta del sig appi
             ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        }  
     }
 
     public function update(Request $request, $id)
@@ -153,12 +151,12 @@ class IngresoController extends Controller
             $faker= Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
-                return response()->json(['message' => 'Authorization header not found'], 401);
+                return response()->json(['mensaje' => 'Authorization header not found'], 401);
             }
             $token = str_replace('Bearer ', '', $authHeader);
             $tokenRecord = Token::where('token1', $token)->first();
             if (!$tokenRecord) {
-                return response()->json(['message' => 'Token not found'], 404);
+                return response()->json(['mensaje' => 'Token not found'], 404);
             }
             $token2 = $tokenRecord->token2;
 
@@ -178,7 +176,7 @@ class IngresoController extends Controller
             //this appi
             $ingreso = Ingreso::find($id);
             if (!$ingreso) {
-                return response()->json(['message' => 'Ingreso no encontrado'], 404);
+                return response()->json(['mensaje' => 'Ingreso no encontrado'], 404);
             }
 
             $request->validate([
@@ -201,9 +199,9 @@ class IngresoController extends Controller
                 'fecha_alta'
             ]));
 
-            return response()->json(['message' => 'Datos actualizado correctamente'], 200);
+            return response()->json(['mensaje' => 'Datos actualizado correctamente'], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
+            return response()->json(['error' => $e->getmensaje()], 422);
         }
     }
 
@@ -213,12 +211,12 @@ class IngresoController extends Controller
             $faker= Faker::create();
             $authHeader = $request->header('Authorization');
             if (!$authHeader) {
-                return response()->json(['message' => 'Authorization header not found'], 401);
+                return response()->json(['mensaje' => 'Authorization header not found'], 401);
             }
             $token = str_replace('Bearer ', '', $authHeader);
             $tokenRecord = Token::where('token1', $token)->first();
             if (!$tokenRecord) {
-                return response()->json(['message' => 'Token not found'], 404);
+                return response()->json(['mensaje' => 'Token not found'], 404);
             }
             $token2 = $tokenRecord->token2;
     
@@ -232,11 +230,11 @@ class IngresoController extends Controller
 
             $ingreso = Ingreso::find($id);
             if (!$ingreso) {
-                return response()->json(['message' => 'Ingreso no encontrado'], 404);
+                return response()->json(['mensaje' => 'Ingreso no encontrado'], 404);
             }
 
             $ingreso->delete();
-            return response()->json(['message' => 'Ingreso eliminado'], 204);
+            return response()->json(['mensaje' => 'Ingreso eliminado'], 204);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json(['errors' => $e->validator->errors()], 422);
         }
