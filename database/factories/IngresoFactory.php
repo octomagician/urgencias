@@ -4,8 +4,6 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Diagnostico;
-use App\Models\Ingreso;
-use App\Models\Historial;
 use App\Models\Paciente;
 use App\Models\Cama;
 use App\Models\Personal;

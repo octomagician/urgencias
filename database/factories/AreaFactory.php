@@ -3,18 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\User;
-use App\Models\Persona;
-use App\Models\Paciente;
-use App\Models\TiposDePersonal;
-use App\Models\Personal;
-use App\Models\TiposDeEstudio;
 use App\Models\Area;
-use App\Models\Ingreso;
-use App\Models\Estudio;
-use App\Models\Historial;
-use App\Models\Cama;
-use App\Models\Diagnostico;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Area>
  */
@@ -27,8 +16,43 @@ class AreaFactory extends Factory
      */
     public function definition()
     {
-        $areasPosibles = ['Triaje', 'Recepción', 'Evaluación Inicial', 'Observación', 'Emergencia'
-        , 'Radiología', 'Tratamiento', 'Recuperación', 'Especialidades', 'Consultas Externas'];
+        $areasPosibles = [
+            'Triaje', 
+            'Recepción', 
+            'Evaluación Inicial', 
+            'Observación', 
+            'Emergencia', 
+            'Radiología', 
+            'Tratamiento', 
+            'Recuperación', 
+            'Especialidades', 
+            'Consultas Externas',
+            'Laboratorio', 
+            'Medicina Nuclear', 
+            'Farmacia', 
+            'Medicina Física', 
+            'Atención Urgente', 
+            'Clínica de Ojos', 
+            'Clínicas Médicas', 
+            'Clínicas de Neurología', 
+            'Neurociencias', 
+            'Cirugía Ambulatoria', 
+            'Centro del Dolor', 
+            'Centro Cardíaco Preventivo', 
+            'Clínicas Quirúrgicas', 
+            'Cirugía para Pérdida de Peso', 
+            'Clínicas de Maternidad', 
+            'Unidad de Cuidados Intensivos Neonatales', 
+            'Servicios Obstétricos y Ginecológicos', 
+            'Servicios Pediátricos', 
+            'Servicios Quirúrgicos Pediátricos', 
+            'Salud Pélvica', 
+            'Centro de Diagnóstico Prenatal', 
+            'Centro Oncológico', 
+            'Centro de Detección de Cáncer', 
+            'Programa de Trasplantes', 
+            'Psiquiatría'
+        ];
 
         return [
             'nombre' => $this->faker->randomElement($areasPosibles),

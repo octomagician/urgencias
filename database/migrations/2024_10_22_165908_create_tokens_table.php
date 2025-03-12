@@ -15,8 +15,7 @@ return new class extends Migration
     {
         Schema::create('tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('token1'); // Nombre de la API (API2, API4, etc.)
-            $table->string('token2'); // Token de acceso
+            $table->string('token');
             $table->timestamp('expires_at')->nullable(); // Permitir que sea nulo, el valor se establece en el código
             $table->timestamps();
         });

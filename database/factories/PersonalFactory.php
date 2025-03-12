@@ -18,7 +18,6 @@ class PersonalFactory extends Factory
      */
     public function definition()
     {
-        // Obtener un tipo de personal existente de manera aleatoria
         $tipoDePersonal = TiposDePersonal::inRandomOrder()->first();
 
         return [

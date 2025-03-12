@@ -50,10 +50,10 @@ class AuthController extends Controller
         }
     
         $token = $user->createToken('auth_token')->plainTextToken;   
-        $token = Token::updateOrCreate(
-            ['token1' => $token], 
-            /*['token2' => 'null']*/
-        );
+        /*$token = Token::updateOrCreate(
+            ['token' => $token], 
+            ['token2' => 'null']
+        );*/
 
         $role = $user->roles->first()->name;
 

@@ -10,8 +10,7 @@ class Token extends Model
     use HasFactory;
 
     protected $fillable = [
-        'token1',
-        'token2',
+        'token'
     ];
     
 }
