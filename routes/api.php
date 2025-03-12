@@ -20,8 +20,11 @@ use App\Http\Controllers\EstudiosController;
 use App\Http\Controllers\practicaunoController;
 use App\Http\Controllers\Auth\SanctumController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
+use App\Http\Controllers\LogController;
 
 // GUEST --------------------------------------------
+
+Route::apiResource('logs', LogController::class); // PROBAR?????
 
 Route::post('v2/registrar', [PersonalController::class, 'registrar']);
 Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
