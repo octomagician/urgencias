@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TokenController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -17,10 +16,10 @@ use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
-use App\Http\Controllers\practicaunoController;
 use App\Http\Controllers\Auth\SanctumController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 use App\Http\Controllers\LogController;
+use App\Models\Log as LogModel;
 
 // GUEST --------------------------------------------
 
@@ -65,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // ADMINISTRADOR --------------------------------------------
         Route::middleware(['roleCustom:Administrador'])->group(function () {
 
-            
+
 
 
 

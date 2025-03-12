@@ -6,64 +6,76 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
-use App\Http\Controllers\TokenController;
-use App\Models\Token;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
 use App\Mail\RegistroCorreo;
-use App\Mail\RegistroCorreoAdmin;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountActivationMail;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
+use App\Models\Log as LogModel;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
+        // Validar los datos de entrada
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+    
+        // Si la validación falla, retornar errores
+        if ($validator->fails()) {
+            return response()->json([
+                'mensaje' => 'Error',
+                'error' => $validator->errors()
+            ], 400);
+        }
+    
+        // Intentar autenticar al usuario
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'mensaje' => 'Credenciales inválidas',
             ], 401);
         }
-        
-        if ($validator->fails()) {
-            return response()->json([
-                'mensaje' => 'Error',
-                'error' => $validator->errors()
-            ]);
-        }
-
+    
+        // Obtener el usuario autenticado
         $user = Auth::user();
-
-        if ($user->email_verified_at === null) { 
+    
+        // Verificar si el correo electrónico está verificado
+        if ($user->email_verified_at === null) {
             return response()->json(['mensaje' => 'Cuenta no activada'], 403);
         }
     
-        $token = $user->createToken('auth_token')->plainTextToken;   
-        /*$token = Token::updateOrCreate(
-            ['token' => $token], 
-            ['token2' => 'null']
-        );*/
-
+        // Crear un token de acceso para el usuario
+        $token = $user->createToken('auth_token')->plainTextToken;
+    
+        // Obtener el rol del usuario
         $role = $user->roles->first()->name;
-
+    
+        // Registrar el log en MongoDB
+        $logData = [
+            'action' => 'login', // Acción realizada
+            'user_id' => $user->id, // ID del usuario
+            'details' => 'Inicio de sesión exitoso', // Detalles adicionales
+        ];
+    
+        // Guardar el log usando el modelo con alias
+        LogModel::create($logData);
+    
+        // Retornar respuesta exitosa
         return response()->json([
             'mensaje' => 'Autenticación exitosa',
             'token' => $token,
             'role' => $role
-        ]); 
+        ], 200);
     }
-
+    
     public function activateAccount(Request $request, User $user)
     {
         if ($user->hasVerifiedEmail()) {

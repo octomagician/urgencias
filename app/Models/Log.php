@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Log extends Model
 {
@@ -11,8 +10,8 @@ class Log extends Model
     protected $collection = 'logs';   // Nombre de la colección en MongoDB
 
     protected $fillable = [
-        'accion',
-        'users_id',
-        'detalle',
+        'action',
+        'user_id',
+        'details',
     ];
 }
