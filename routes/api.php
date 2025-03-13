@@ -18,62 +18,59 @@ use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
 use App\Http\Controllers\Auth\SanctumController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
-use App\Http\Controllers\LogController;
-use App\Models\Log as LogModel;
 
-// GUEST --------------------------------------------
+Route::middleware('log.activity')->group(function () {
+    // GUEST --------------------------------------------
+    Route::post('v2/registrar', [PersonalController::class, 'registrar']);
+    Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
 
-Route::apiResource('logs', LogController::class); // PROBAR?????
+    Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
+        ->name('activate.account')
+        ->middleware('signed'); //para verificar si el enlace es válido
 
-Route::post('v2/registrar', [PersonalController::class, 'registrar']);
-Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
+    Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
 
-Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
-    ->name('activate.account')
-    ->middleware('signed'); //para verificar si el enlace es válido
+    Route::post('login', [AuthController::class, 'login']); 
+    Route::post('token-command', [TokenController::class, 'store']);
 
-Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
+    Route::post('login', [AuthController::class, 'login']);
 
-Route::post('login', [AuthController::class, 'login']); 
-Route::post('token-command', [TokenController::class, 'store']);
-
-Route::post('login', [AuthController::class, 'login']);
-
-// USER --------------------------------------------
-Route::middleware('auth:sanctum')->group(function () {
-    // ver el perfil propio
-    // ver el historial clínico propio
-    Route::delete('v2/logout', [AuthController::class, 'logout']);
-
-// USER PERSONAL --------------------------------------------
-    Route::middleware(['roleCustom:Administrador,UserPersonal'])->group(function () {
+    // USER --------------------------------------------
+    Route::middleware('auth:sanctum')->group(function () {
+        // ver el historial clínico propio
+        Route::delete('v2/logout', [AuthController::class, 'logout']);
 
         // perfil
-        Route::get('v2/perfil', [PersonalController::class, 'perfil']);
-        Route::put('v2/perfil', [PersonalController::class, 'actualizarPerfil']);
+        Route::get('v2/perfil', [PersonaController::class, 'perfil']);
+        Route::put('v2/perfil', [PersonaController::class, 'actualizarPerfil']);
         Route::post('v2/resetPassword', [AuthController::class, 'resetPassword']);
 
-        // pacientes
-        Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
-        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
-        ->where('nss', '[0-9]{11}');
-        Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
-        ->where('nss', '[0-9]{11}');
+    // USER PERSONAL --------------------------------------------
+        Route::middleware(['roleCustom:Administrador,UserPersonal'])->group(function () {
 
 
-// ADMINISTRADOR --------------------------------------------
-        Route::middleware(['roleCustom:Administrador'])->group(function () {
+            // pacientes
+            Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
+            Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
+            ->where('nss', '[0-9]{11}');
+            Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
+            ->where('nss', '[0-9]{11}');
 
 
-
-
-
-
-
+    // ADMINISTRADOR --------------------------------------------
+            Route::middleware(['roleCustom:Administrador'])->group(function () {
 
 
 
 
+
+
+
+
+
+
+
+            });
         });
     });
 });

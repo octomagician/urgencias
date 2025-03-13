@@ -17,7 +17,6 @@ use App\Mail\AccountActivationMail;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Log as LogModel;
 
 class AuthController extends Controller
 {
@@ -57,16 +56,6 @@ class AuthController extends Controller
     
         // Obtener el rol del usuario
         $role = $user->roles->first()->name;
-    
-        // Registrar el log en MongoDB
-        $logData = [
-            'action' => 'login', // Acción realizada
-            'user_id' => $user->id, // ID del usuario
-            'details' => 'Inicio de sesión exitoso', // Detalles adicionales
-        ];
-    
-        // Guardar el log usando el modelo con alias
-        LogModel::create($logData);
     
         // Retornar respuesta exitosa
         return response()->json([
