@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 use Illuminate\Support\Facades\Validator;
-
-use App\Models\Token;
-
 use Exception; //para el trycatch
 
 //para el correo con ruta firmada

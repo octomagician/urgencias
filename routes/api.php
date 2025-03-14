@@ -37,6 +37,7 @@ Route::middleware('log.activity')->group(function () {
 
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
+
         // ver el historial clínico propio
         Route::delete('v2/logout', [AuthController::class, 'logout']);
 
