@@ -15,11 +15,76 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountActivationMail;
 
+//correo con clave de verificación
+use Illuminate\Support\Str;
+use App\Mail\RegistroCodigoCorreo;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+    public function verificarCodigo(Request $request)
+    {
+        // Validar manualmente
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'codigo' => 'required|string|size:6',
+        ], [
+            'email.required' => 'El campo correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
+            'codigo.required' => 'El campo código es obligatorio.',
+            'codigo.string' => 'El código debe ser una cadena de texto.',
+            'codigo.size' => 'El código debe tener exactamente 6 caracteres.',
+        ]);
+
+        // Si la validación falla, devolver una respuesta JSON
+        if ($validator->fails()) {
+            return response()->json([
+                'mensaje' => 'Error de validación',
+                'errores' => $validator->errors(),
+            ], 422);
+        }
+
+        // Buscar al usuario por correo electrónico
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['mensaje' => 'Usuario no encontrado'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
+        }
+
+        // Verificar el código
+        if ($user->verification_code !== $request->codigo) {
+            return response()->json(['mensaje' => 'Código de verificación incorrecto'], 400);
+        }
+
+        // Verificar si el código ha expirado
+        if (Carbon::now()->gt($user->verification_code_expires_at)) {
+            return response()->json(['mensaje' => 'El código ha expirado'], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+            $user->markEmailAsVerified();
+            Log::info('Email marcado como verificado: ' . $user->email_verified_at);
+            $user->verification_code = null; // Limpiar el código
+            $user->removeRole('Guest'); 
+            $user->assignRole('User');
+            $user->save(); //todos menos email lo ocupan
+            Log::info('Cambios guardados en la base de datos.');
+            DB::commit();
+            return response()->json(['mensaje' => 'Cuenta activada exitosamente'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al activar cuenta: " . $e->getMessage());
+            return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
+        }
+    }
+    
     public function login(Request $request)
     {
         // Validar los datos de entrada
@@ -65,7 +130,10 @@ class AuthController extends Controller
             'name' => $user->name 
         ], 200);
     }
+
     
+
+    /*
     public function activateAccount(Request $request, User $user)
     {
         if ($user->hasVerifiedEmail()) {
@@ -115,6 +183,7 @@ class AuthController extends Controller
                 return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
             }
             
+            
             $signedUrl = URL::temporarySignedRoute(
                 'activate.account',
                 Carbon::now()->addMinutes(1),
@@ -122,6 +191,16 @@ class AuthController extends Controller
             );
 
             Mail::to($user->email)->send(new RegistroCorreo($user, 'Confirmación requerida', $signedUrl));
+            
+
+        // Generar un nuevo código de verificación
+        $newVerificationCode = Str::random(6); // Código de 6 caracteres
+        $user->verification_code = $newVerificationCode;
+        $user->verification_code_expires_at = Carbon::now()->addMinutes(5); // Válido por 5 minutos
+        $user->save();
+
+        // Enviar el nuevo código por correo electrónico
+        Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Nuevo código de verificación', $newVerificationCode));
 
             return response()->json(['mensaje' => 'Correo de activación reenviado']);
         }
@@ -129,24 +208,25 @@ class AuthController extends Controller
         {  
             return response()->json(['mensaje' => 'Credenciales inválidas'], 422);
         }
-    }
+    }*/
 
+    /*
     public function authorizeUserRole(Request $request, User $user)
     {
-/*         dd(auth()->user()->roles->pluck('name'));
+        dd(auth()->user()->roles->pluck('name'));
         dd(auth()->user()->getAllPermissions()->pluck('name'));
         $adminRole = Spatie\Permission\Models\Role::findByName('Administrador');
         dd($adminRole->permissions);
 
         if (auth()->user()->cannot('authorize roles')) {
             return response()->json(['mensaje' => 'No autorizado'], 403);
-        } */
+        }
 
         try {
             DB::beginTransaction();
 
             $user->removeRole('guest'); 
-/*             $user->assignRole($user->requested_role); */
+             $user->assignRole($user->requested_role);
 
             DB::commit();
 
@@ -156,9 +236,7 @@ class AuthController extends Controller
             Log::error("Error al autorizar rol de usuario: " . $e->getmensaje());
             return response()->json(['error' => 'Ocurrió un problema al autorizar el rol'], 500);
         }
-    }
-
-    // -------------------------------------------------------------------
+    }*/
 
     public function logout(Request $request)
     {

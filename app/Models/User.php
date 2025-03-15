@@ -10,17 +10,20 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Permission\Middlewares\RoleMiddleware;
+use Illuminate\Auth\MustVerifyEmail; //Para acceder al sistema de verificación de correo electrónico de Laravel
 
-class User extends Model
+class User extends Authenticatable // extender Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, MustVerifyEmail; // MustVerifyEmail aquí
 
     protected $fillable = ['persona_id', 
     'tipo_id',
     'username',
     'email',
     'password',
-    'profile_photo_path',];
+    'profile_photo_path',
+    'verification_code',
+    'verification_code_expires_at',];
 
     protected $table = 'users';
 

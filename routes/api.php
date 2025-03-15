@@ -21,13 +21,35 @@ use Spatie\Permission\Middlewares\RoleMiddleware;
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
+    Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    Route::post('/reenviar-codigo', [AuthController::class, 'resendActivation']);
+
     Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
 
     Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
         ->name('activate.account')
         ->middleware('signed'); //para verificar si el enlace es válido
 
-    Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
+    
 
     Route::post('login', [AuthController::class, 'login']); 
     Route::post('token-command', [TokenController::class, 'store']);

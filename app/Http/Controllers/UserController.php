@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 use Illuminate\Support\Facades\Validator;
-use Exception; //para el trycatch
+//use Exception; //para el trycatch
 
 //para el correo con ruta firmada
 use App\Mail\RegistroCorreo;
@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AccountActivationMail;
+
+//correo con clave de verificación
+use Illuminate\Support\Str;
+use App\Mail\RegistroCodigoCorreo;
 
 //para los roles de usuario
 use App\Models\User;
@@ -36,55 +40,43 @@ class UserController extends Controller
     
         \DB::beginTransaction();
 
-        try {
-            $persona = Persona::create([
-                'nombre' => $request->nombre,
-                'apellido_paterno' => $request->apellido_paterno,
-                'apellido_materno' => $request->apellido_materno,
-                'sexo' => $request->sexo,
-            ]);
+        $persona = Persona::create([
+            'nombre' => $request->nombre,
+            'apellido_paterno' => $request->apellido_paterno,
+            'apellido_materno' => $request->apellido_materno,
+            'sexo' => $request->sexo,
+        ]);
 
-            $user = User::create([
-                'persona_id' => $persona->id,
-                'tipo_id' => $request->tipo_id,
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-        
-            $user->assignRole('guest');
-        
-            if (!$user) {
-                return response()->json([
-                    'mensaje' => 'No se pudo crear el usuario'
-                ], 500);
-            }
+        $user = User::create([
+            'persona_id' => $persona->id,
+            'tipo_id' => $request->tipo_id,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'verification_code' => Str::random(6), // Generar un código de 6 caracteres
+            'verification_code_expires_at' => Carbon::now()->addMinutes(5), // Código válido por 5 minutos
+        ]);
 
-            if (isset($user)) { 
-
-                $signedUrl = URL::temporarySignedRoute(
-                    'activate.account', // nombre de la ruta
-                    Carbon::now()->addMinutes(5),
-                    ['user' => $user->id]
-                );
-        
-                Mail::to($user->email)->send(new RegistroCorreo($user, 'Registro exitoso', $signedUrl));
-                
-                return response()->json([
-                    'mensaje' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
-                    'user' => $user,
-                ], 201);
-            }
-            } catch (\Exception $e) {
-                // Revertir la transacción en caso de error
-                \DB::rollBack();
+        if (!$user) {
+            return response()->json([
+                'mensaje' => 'No se pudo crear el usuario'
+            ], 500);
+        }
     
-                // Devolver una respuesta JSON de error
-                return response()->json([
-                    'mensaje' => 'No se pudo crear el usuario',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
+        $user->assignRole('guest');
+    
+        if (isset($user)) { 
+            // Enviar el correo de registro con el código de verificación
+            Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Registro exitoso', $user->verification_code));
+
+            // Confirmar la transacción
+            \DB::commit();
+            
+            return response()->json([
+                'mensaje' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
+                'user' => $user,
+            ], 201);
+        }
     }
 
     public function read($id = null)

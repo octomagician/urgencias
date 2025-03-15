@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
@@ -22,6 +17,8 @@ return new class extends Migration
             $table->string('profile_photo_path')->nullable();
             $table->unsignedBigInteger('persona_id')->nullable();
             $table->unsignedBigInteger('tipo_id')->nullable();
+            $table->string('verification_code')->nullable(); // Código de verificación
+            $table->timestamp('verification_code_expires_at')->nullable(); // Fecha de expiración
             $table->timestamps();
             $table->softDeletes();
             $table->rememberToken();
@@ -31,11 +28,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('users');

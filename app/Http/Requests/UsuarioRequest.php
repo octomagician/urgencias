@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UsuarioRequest extends FormRequest
 {
@@ -73,5 +75,14 @@ class UsuarioRequest extends FormRequest
 
             'tipo_id' => 'tipo de personal',
         ];
+    }
+
+    // Personalizar la respuesta de error para que me devuelva un JSON, algo parecido a if ($validator->fails() cuando uso validator
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'mensaje' => 'Error de validación',
+            'errores' => $validator->errors(),
+        ], 422));
     }
 }
