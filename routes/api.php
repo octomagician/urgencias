@@ -15,44 +15,28 @@ use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
-use App\Http\Controllers\Auth\SanctumController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
     Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
+
+
+
+
+
+
+
+
+
+
+
 
     Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
 
-    Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
-        ->name('activate.account')
-        ->middleware('signed'); //para verificar si el enlace es válido
-
-    
-
     Route::post('login', [AuthController::class, 'login']); 
-    Route::post('token-command', [TokenController::class, 'store']);
 
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
