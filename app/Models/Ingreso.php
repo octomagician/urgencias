@@ -15,7 +15,7 @@ class Ingreso extends Model
         'pacientes_id',
         'diagnostico_id',
         'camas_id',
-        'personal_id',
+        'user_id',
         'fecha_ingreso',
         'motivo_ingreso',
         'fecha_alta',

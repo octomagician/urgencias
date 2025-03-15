@@ -5,36 +5,28 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use App\Models\User;
-use App\Models\Persona;
+use App\Models\Persona; 
+use App\Models\TiposDePersonal;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     protected $model = User::class;
 
     public function definition()
     {
+        $tipoDePersonal = TiposDePersonal::inRandomOrder()->first();
+
         return [
-            'name' => fake()->name(),
+            'username' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => bcrypt('password'), //con todo y hasheo
+            'password' => bcrypt('password'),
             'remember_token' => Str::random(10),
+            'persona_id' => Persona::factory(), // Crea una nueva persona o usa una existente
+            'tipo_id' => $tipoDePersonal ? $tipoDePersonal->id : TiposDePersonal::factory(), // Usa un tipo existente o crea uno nuevo si no hay
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     *
-     * @return static
-     */
     public function unverified()
     {
         return $this->state(fn (array $attributes) => [

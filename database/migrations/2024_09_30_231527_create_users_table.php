@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Schema; 
 
 return new class extends Migration
 {
@@ -15,15 +15,19 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('username');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
+            $table->string('profile_photo_path')->nullable();
+            $table->unsignedBigInteger('persona_id')->nullable();
+            $table->unsignedBigInteger('tipo_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
-/*             $table->enum('requested_role', ['user', 'administrador', 'guest'])->nullable(); */
-            $table->string('profile_photo_path')->nullable();
+            $table->rememberToken();
+            
+            $table->foreign('persona_id')->references('id')->on('personas');
+            $table->foreign('tipo_id')->references('id')->on('tipos_de_personal');
         });
     }
 

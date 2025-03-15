@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('pacientes_id');
             $table->unsignedBigInteger('diagnostico_id');
             $table->unsignedBigInteger('camas_id');
-            $table->unsignedBigInteger('personal_id');
+            $table->unsignedBigInteger('user_id');
             $table->date('fecha_ingreso');
             $table->text('motivo_ingreso');
             $table->date('fecha_alta')->nullable();
@@ -28,15 +28,10 @@ return new class extends Migration
             $table->foreign('pacientes_id')->references('id')->on('pacientes');
             $table->foreign('diagnostico_id')->references('id')->on('diagnosticos');
             $table->foreign('camas_id')->references('id')->on('camas');
-            $table->foreign('personal_id')->references('id')->on('personal');
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('ingresos');

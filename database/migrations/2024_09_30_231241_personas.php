@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('apellido_materno', 35);
             $table->string('sexo', 1);
             $table->timestamps();
-            $table->unsignedBigInteger('users_id')->nullable();
             $table->softDeletes();
         });
     }

@@ -10,11 +10,6 @@ use App\Models\Estudio;
 
 class EstudiosSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
         Estudio::factory(100)->create();

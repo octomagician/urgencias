@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             PacientesSeeder::class,
             
             TiposDePersonalSeeder::class,
-            PersonalSeeder::class,
+            UserSeeder::class,
             
             TiposDeEstudiosSeeder::class,
             

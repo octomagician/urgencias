@@ -15,7 +15,7 @@ class Historial extends Model
 
     protected $fillable = [
         'ingreso_id',
-        'personal_id',
+        'user_id',
         'presion',
         'temperatura',
         'glucosa',
@@ -28,8 +28,8 @@ class Historial extends Model
         return $this->hasOne(Ingreso::class);
     }
 
-    public function personal()
+    public function user()
     {
-        return $this->hasOne(Personal::class);
+        return $this->hasOne(User::class);
     }
 }

@@ -3,11 +3,10 @@
 namespace Database\Seeders;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
 use App\Models\User;
+use App\Models\Persona;
 
 class RoleSeeder extends Seeder
 {
@@ -15,7 +14,6 @@ class RoleSeeder extends Seeder
     {
         $guest = Role::create(['name' => 'Guest']);
         $user = Role::create(['name' => 'User']);
-        //$userPersonal = Role::create(['name' => 'UserPersonal']);
         $admin = Role::create(['name' => 'Administrador']);
 
         Permission::create(['name' => 'ver perfil']);
@@ -25,11 +23,12 @@ class RoleSeeder extends Seeder
 
         $user->givePermissionTo(['ver perfil', 'editar perfil', 'subir foto de perfil']);
         $admin->givePermissionTo(Permission::all());
-
+        
         $admin = User::factory()->create([
-            'name' => 'Admin',
+            'username' => 'Admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
+            'persona_id' => Persona::factory()
         ]);
         $admin->assignRole('Administrador');
     }

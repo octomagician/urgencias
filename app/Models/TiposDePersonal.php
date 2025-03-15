@@ -8,14 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TiposDePersonal extends Model
 {
-    use SoftDeletes;
-    use HasFactory;
+    use SoftDeletes, HasFactory;
     
     protected $fillable = ['nombre'];
     protected $table = 'tipos_de_personal';
 
-    public function personal()
+    public function user()
     {
-        return $this->hasMany(Personal::class, 'tipo_id');
+        return $this->hasMany(User::class, 'tipo_id');
     }
 }

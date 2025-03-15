@@ -12,7 +12,7 @@ class Persona extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'nombre', 'apellido_paterno', 'apellido_materno', 'sexo', 'users_id',
+        'nombre', 'apellido_paterno', 'apellido_materno', 'sexo'
     ];
 
     public function user()
@@ -23,10 +23,5 @@ class Persona extends Model
     public function paciente()
     {
         return $this->hasOne(Paciente::class);
-    }
-
-    public function personal()
-    {
-        return $this->hasOne(Personal::class);
     }
 }
