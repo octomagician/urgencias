@@ -16,7 +16,8 @@ class PersonalSeeder extends Seeder
     public function run()
     {
         User::factory(10)->create()->each(function ($user) {
-            $user->assignRole('UserPersonal'); 
+            //$user->assignRole('UserPersonal'); 
+            $user->assignRole('User'); 
             
             $persona = Persona::factory()->create([
                 'users_id' => $user->id,

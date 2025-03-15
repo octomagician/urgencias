@@ -77,8 +77,8 @@ class AuthController extends Controller
     
             $user->markEmailAsVerified();
     
-            $user->removeRole('guest'); 
-            $user->assignRole('Administrador');
+            $user->removeRole('Guest'); 
+            $user->assignRole('User');
     
             //$adminEmail = User::role('Administrador')->first()->email;
             //Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));

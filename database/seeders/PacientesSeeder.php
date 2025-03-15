@@ -18,13 +18,9 @@ class PacientesSeeder extends Seeder
      */
     public function run()
     {
-        User::factory(30)->create()->each(function ($user) {
-            $user->assignRole('User'); 
-            
-            $persona = Persona::factory()->create([
-                'users_id' => $user->id,
-            ]);
-
+        // Crear 30 personas
+        Persona::factory(30)->create()->each(function ($persona) {
+            // Crear un paciente asociado a la persona
             Paciente::factory()->create([
                 'persona_id' => $persona->id,
             ]);

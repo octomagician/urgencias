@@ -33,12 +33,8 @@ Route::middleware('log.activity')->group(function () {
     Route::post('login', [AuthController::class, 'login']); 
     Route::post('token-command', [TokenController::class, 'store']);
 
-    Route::post('login', [AuthController::class, 'login']);
-
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
-
-        // ver el historial clínico propio
         Route::delete('v2/logout', [AuthController::class, 'logout']);
 
         // perfil
@@ -46,32 +42,18 @@ Route::middleware('log.activity')->group(function () {
         Route::put('v2/perfil', [PersonaController::class, 'actualizarPerfil']);
         Route::post('v2/resetPassword', [AuthController::class, 'resetPassword']);
 
-    // USER PERSONAL --------------------------------------------
-        Route::middleware(['roleCustom:Administrador,UserPersonal'])->group(function () {
-
-
-            // pacientes
-            Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
-            Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
+        // todos los gets
+        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
             ->where('nss', '[0-9]{11}');
-            Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
-            ->where('nss', '[0-9]{11}');
-
 
     // ADMINISTRADOR --------------------------------------------
             Route::middleware(['roleCustom:Administrador'])->group(function () {
 
-
-
-
-
-
-
-
-
-
+             // pacientes
+             Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
+             Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
+             ->where('nss', '[0-9]{11}');
 
             });
         });
     });
-});
