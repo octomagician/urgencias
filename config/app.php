@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Facade;
 
 return [
 
+    'frontend_uri' => env('FRONTEND_URI', 'http://localhost:4200'),
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -69,7 +70,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    //'timezone' => 'UTC',
+    'timezone' => 'America/Mexico_City',
 
     /*
     |--------------------------------------------------------------------------
@@ -108,7 +110,8 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    //'faker_locale' => 'en_US',
+    'faker_locale' => 'es_MX',
 
     /*
     |--------------------------------------------------------------------------

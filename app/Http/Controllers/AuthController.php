@@ -9,15 +9,13 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
-use App\Mail\RegistroCorreo;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\AccountActivationMail;
 
 //correo con clave de verificación
 use Illuminate\Support\Str;
 use App\Mail\RegistroCodigoCorreo;
+use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -84,7 +82,48 @@ class AuthController extends Controller
             return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
         }
     }
-    
+
+    public function reenviarCodigo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|min:8'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'mensaje' => 'Error en la validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+
+            if ($user->email_verified_at !== null) {
+                return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
+            }
+            
+        // Generar un nuevo código de verificación
+        $newVerificationCode = Str::random(6); // Código de 6 caracteres
+        $user->verification_code = $newVerificationCode;
+        $user->verification_code_expires_at = Carbon::now()->addMinutes(5); // Válido por 5 minutos
+        $user->save();
+
+        // Enviar el nuevo código por correo electrónico
+        $frontendUri = config('app.frontend_uri');
+        //dd($frontendUri);
+        Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Nuevo código de verificación', $newVerificationCode, $frontendUri));
+
+            return response()->json(['mensaje' => 'Correo de activación reenviado']);
+        }
+        else 
+        {  
+            return response()->json(['mensaje' => 'Credenciales inválidas'], 422);
+        }
+    }
+
     public function login(Request $request)
     {
         // Validar los datos de entrada
@@ -158,55 +197,6 @@ class AuthController extends Controller
             DB::rollBack();
             Log::error("Error al activar cuenta: " . $e->getMessage());
             return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
-        }
-    }
-
-    public function resendActivation(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:8'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'mensaje' => 'Error en la validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if ($user && Hash::check($request->password, $user->password)) {
-
-            if ($user->email_verified_at !== null) {
-                return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
-            }
-            
-            
-            $signedUrl = URL::temporarySignedRoute(
-                'activate.account',
-                Carbon::now()->addMinutes(1),
-                ['user' => $user->id]
-            );
-
-            Mail::to($user->email)->send(new RegistroCorreo($user, 'Confirmación requerida', $signedUrl));
-            
-
-        // Generar un nuevo código de verificación
-        $newVerificationCode = Str::random(6); // Código de 6 caracteres
-        $user->verification_code = $newVerificationCode;
-        $user->verification_code_expires_at = Carbon::now()->addMinutes(5); // Válido por 5 minutos
-        $user->save();
-
-        // Enviar el nuevo código por correo electrónico
-        Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Nuevo código de verificación', $newVerificationCode));
-
-            return response()->json(['mensaje' => 'Correo de activación reenviado']);
-        }
-        else 
-        {  
-            return response()->json(['mensaje' => 'Credenciales inválidas'], 422);
         }
     }*/
 

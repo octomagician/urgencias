@@ -105,7 +105,7 @@
         <div class="content">
             <p>{{ $contenido }}</p>
             <p>Por favor, activa tu cuenta ingresando el siguiente código en la página de verificación:</p>
-            <p><a href="{{ env('FRONTEND_URI') }}/verificacion">Haz clic aquí para verificar tu cuenta</a></p>
+            <p><a href="{{ $frontendUri }}/verificacion">Haz clic aquí para verificar tu cuenta</a></p>
             <div class="button-container">
                 <strong>{{ $verificationCode }}</strong>
             </div>

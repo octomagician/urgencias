@@ -40,8 +40,8 @@ Route::middleware('log.activity')->group(function () {
 
 
 
-    
-    Route::post('/reenviar-codigo', [AuthController::class, 'resendActivation']);
+
+    Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
 
     Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
 

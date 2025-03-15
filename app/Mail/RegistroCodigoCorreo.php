@@ -17,12 +17,14 @@ class RegistroCodigoCorreo extends Mailable
     protected $user;
     protected $contenido;
     public $verificationCode;
+    public $frontendUri;
 
-    public function __construct(User $user, string $contenido, $verificationCode)
+    public function __construct(User $user, string $contenido, $verificationCode, $frontendUri)
     {
         $this->user = $user;
         $this->contenido = $contenido;
         $this->verificationCode = $verificationCode;
+        $this->frontendUri = $frontendUri;
     }
 
     public function build()
@@ -32,6 +34,7 @@ class RegistroCodigoCorreo extends Mailable
                         'user' => $this->user,
                         'contenido' => $this->contenido,
                         'verificationCode' => $this->verificationCode,
+                        'frontendUri' => $this->frontendUri,
                     ]);
     }
 
