@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\RegisterUserRequest;
+use App\Http\Requests\UsuarioRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -26,37 +26,37 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 use Illuminate\Support\Facades\Storage;
+use App\Models\Persona;
 
 class UserController extends Controller
 { 
     use Notifiable, HasRoles;
 
-    public function create(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:8',
-        ]);
+    public function create(UsuarioRequest $request){
+    
+        \DB::beginTransaction();
+
+        try {
+            $persona = Persona::create([
+                'nombre' => $request->nombre,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
+                'sexo' => $request->sexo,
+            ]);
+
+            $user = User::create([
+                'persona_id' => $persona->id,
+                'tipo_id' => $request->tipo_id,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
         
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Error en la validación',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password)
-        ]);
-
-        $user->assignRole('guest');
-
+            $user->assignRole('guest');
+        
             if (!$user) {
                 return response()->json([
-                    'message' => 'No se pudo crear el usuario'
+                    'mensaje' => 'No se pudo crear el usuario'
                 ], 500);
             }
 
@@ -67,15 +67,25 @@ class UserController extends Controller
                     Carbon::now()->addMinutes(5),
                     ['user' => $user->id]
                 );
-
+        
                 Mail::to($user->email)->send(new RegistroCorreo($user, 'Registro exitoso', $signedUrl));
                 
                 return response()->json([
-                    'message' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
+                    'mensaje' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
                     'user' => $user,
                 ], 201);
             }
-        }
+            } catch (\Exception $e) {
+                // Revertir la transacción en caso de error
+                \DB::rollBack();
+    
+                // Devolver una respuesta JSON de error
+                return response()->json([
+                    'mensaje' => 'No se pudo crear el usuario',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+    }
 
     public function read($id = null)
     {
@@ -182,4 +192,5 @@ class UserController extends Controller
 
         return response($fileContent)->header('Content-Type', 'image/png');
     }
+
 }

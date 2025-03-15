@@ -8,7 +8,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\TiposDePersonalController;
-use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\DiagnosticoController;
 use App\Http\Controllers\CamaController;
@@ -21,7 +20,7 @@ use Spatie\Permission\Middlewares\RoleMiddleware;
 
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
-    Route::post('v2/registrar', [PersonalController::class, 'registrar']);
+    Route::post('registrar', [UserController::class, 'create']);
     Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
 
     Route::get('/activate/{user}', [AuthController::class, 'activateAccount'])
