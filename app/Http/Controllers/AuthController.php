@@ -124,7 +124,7 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request)
+    public function entrar(Request $request)
     {
         // Validar los datos de entrada
         $validator = Validator::make($request->all(), [
@@ -166,7 +166,7 @@ class AuthController extends Controller
             'mensaje' => 'Autenticación exitosa',
             'token' => $token,
             'role' => $role,
-            'name' => $user->name 
+            'username' => $user->username 
         ], 200);
     }
 
@@ -228,7 +228,7 @@ class AuthController extends Controller
         }
     }*/
 
-    public function logout(Request $request)
+    public function salir(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['mensaje' => 'Sesión cerrada correctamente.'], 200);

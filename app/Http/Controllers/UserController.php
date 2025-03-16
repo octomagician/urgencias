@@ -66,8 +66,9 @@ class UserController extends Controller
         $user->assignRole('guest');
     
         if (isset($user)) { 
+            $frontendUri = config('app.frontend_uri');
             // Enviar el correo de registro con el código de verificación
-            Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Registro exitoso', $user->verification_code));
+            Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Registro exitoso', $user->verification_code, $frontendUri));
 
             // Confirmar la transacción
             \DB::commit();

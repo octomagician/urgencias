@@ -20,27 +20,22 @@ use Spatie\Permission\Middlewares\RoleMiddleware;
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
+    Route::get('puesto', [TiposDePersonalController::class, 'index']); //para el dropdown
     Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
 
-
-
-
-
-
-
-
-
-
-
-
-    Route::get('v2/puesto/', [TiposDePersonalController::class, 'index']); //para el dropdown
-
-    Route::post('login', [AuthController::class, 'login']); 
+    Route::post('entrar', [AuthController::class, 'entrar']); //cambiar a español?
 
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
-        Route::delete('v2/logout', [AuthController::class, 'logout']);
+        Route::delete('salir', [AuthController::class, 'salir']);
+
+
+
+
+
+
+
 
         // perfil
         Route::get('v2/perfil', [PersonaController::class, 'perfil']);
