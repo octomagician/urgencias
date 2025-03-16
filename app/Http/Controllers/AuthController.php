@@ -113,7 +113,7 @@ class AuthController extends Controller
 
         // Enviar el nuevo código por correo electrónico
         $frontendUri = config('app.frontend_uri');
-        //dd($frontendUri);
+
         Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Nuevo código de verificación', $newVerificationCode, $frontendUri));
 
             return response()->json(['mensaje' => 'Correo de activación reenviado']);
@@ -169,64 +169,6 @@ class AuthController extends Controller
             'username' => $user->username 
         ], 200);
     }
-
-    
-
-    /*
-    public function activateAccount(Request $request, User $user)
-    {
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
-        }
-    
-        try {
-            DB::beginTransaction();
-    
-            $user->markEmailAsVerified();
-    
-            $user->removeRole('Guest'); 
-            $user->assignRole('User');
-    
-            //$adminEmail = User::role('Administrador')->first()->email;
-            //Mail::to($adminEmail)->send(new RegistroCorreoAdmin($user));
-    
-            DB::commit();
-    
-            return response()->json(['mensaje' => 'Cuenta activada exitosamente']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error al activar cuenta: " . $e->getMessage());
-            return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
-        }
-    }*/
-
-    /*
-    public function authorizeUserRole(Request $request, User $user)
-    {
-        dd(auth()->user()->roles->pluck('name'));
-        dd(auth()->user()->getAllPermissions()->pluck('name'));
-        $adminRole = Spatie\Permission\Models\Role::findByName('Administrador');
-        dd($adminRole->permissions);
-
-        if (auth()->user()->cannot('authorize roles')) {
-            return response()->json(['mensaje' => 'No autorizado'], 403);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $user->removeRole('guest'); 
-             $user->assignRole($user->requested_role);
-
-            DB::commit();
-
-            return response()->json(['mensaje' => 'Rol de usuario autorizado correctamente']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error al autorizar rol de usuario: " . $e->getmensaje());
-            return response()->json(['error' => 'Ocurrió un problema al autorizar el rol'], 500);
-        }
-    }*/
 
     public function salir(Request $request)
     {

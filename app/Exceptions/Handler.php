@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
@@ -46,5 +47,20 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($exception instanceof \Laravel\Sanctum\Exceptions\MissingAbilityException) {
+            return response()->json([
+                'error' => 'Sesión expirada',
+                'mensaje' => 'Tu sesión expiró, vuelve a iniciar sesión.',
+            ], 401);
+        }
+    
+        return response()->json([
+            'error' => 'Sin permisos',
+            'mensaje' => 'Necesitas iniciar sesión para poder ver esto.',
+        ], 401);
     }
 }

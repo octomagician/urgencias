@@ -23,16 +23,38 @@ Route::middleware('log.activity')->group(function () {
     Route::get('puesto', [TiposDePersonalController::class, 'index']); //para el dropdown
     Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
-
-    Route::post('entrar', [AuthController::class, 'entrar']); //cambiar a español?
+    Route::post('entrar', [AuthController::class, 'entrar']);
 
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
+        // todos los gets
+        Route::get('cama', [CamaController::class, 'index']);
 
 
 
+        
+        Route::get('cama/{id?}', [CamaController::class, 'read'])
+            -> where('id', '[0-9]+');
+        //al rato meto estos en ruta de admon
+        //cama
+        Route::post('cama', [CamaController::class, 'create']);
+        //->middleware('role:Administrador'); 
+        Route::put('cama/{id}', [CamaController::class, 'update'])
+        -> where('id', '[0-9]+');
+        //->middleware('role:Administrador'); 
+        Route::delete('cama/{id}', [CamaController::class, 'delete'])
+        -> where('id', '[0-9]+');
+        //->middleware('role:Administrador'); 
+
+
+
+
+
+        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
+            ->where('nss', '[0-9]{11}');
+        
 
 
 
@@ -42,9 +64,7 @@ Route::middleware('log.activity')->group(function () {
         Route::put('v2/perfil', [PersonaController::class, 'actualizarPerfil']);
         Route::post('v2/resetPassword', [AuthController::class, 'resetPassword']);
 
-        // todos los gets
-        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
-            ->where('nss', '[0-9]{11}');
+
 
     // ADMINISTRADOR --------------------------------------------
             Route::middleware(['roleCustom:Administrador'])->group(function () {
