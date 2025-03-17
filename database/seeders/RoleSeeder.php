@@ -24,13 +24,13 @@ class RoleSeeder extends Seeder
         $user->givePermissionTo(['ver perfil', 'editar perfil', 'subir foto de perfil']);
         $admin->givePermissionTo(Permission::all());
         
-        $admin = User::factory()->create([
+        $adminUser = User::factory()->create([
             'username' => 'Admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password'),
             'persona_id' => Persona::factory()
         ]);
-        $admin->assignRole('Administrador');
+        $adminUser->syncRoles('Administrador');
     }
 }
 

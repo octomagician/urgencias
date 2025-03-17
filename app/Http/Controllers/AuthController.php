@@ -70,8 +70,9 @@ class AuthController extends Controller
             $user->markEmailAsVerified();
             Log::info('Email marcado como verificado: ' . $user->email_verified_at);
             $user->verification_code = null; // Limpiar el código
-            $user->removeRole('Guest'); 
-            $user->assignRole('User');
+            //$user->removeRole('Guest'); 
+            //$user->assignRole('User');
+            $user->syncRoles('User');
             $user->save(); //todos menos email lo ocupan
             Log::info('Cambios guardados en la base de datos.');
             DB::commit();
@@ -156,7 +157,8 @@ class AuthController extends Controller
         }
     
         // Crear un token de acceso para el usuario
-        $token = $user->createToken('auth_token')->plainTextToken;
+        //$token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
     
         // Obtener el rol del usuario
         $role = $user->roles->first()->name;

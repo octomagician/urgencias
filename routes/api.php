@@ -25,6 +25,9 @@ Route::middleware('log.activity')->group(function () {
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
     Route::post('entrar', [AuthController::class, 'entrar']);
 
+
+    
+
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
@@ -39,14 +42,7 @@ Route::middleware('log.activity')->group(function () {
             -> where('id', '[0-9]+');
         //al rato meto estos en ruta de admon
         //cama
-        Route::post('cama', [CamaController::class, 'create']);
-        //->middleware('role:Administrador'); 
-        Route::put('cama/{id}', [CamaController::class, 'update'])
-        -> where('id', '[0-9]+');
-        //->middleware('role:Administrador'); 
-        Route::delete('cama/{id}', [CamaController::class, 'delete'])
-        -> where('id', '[0-9]+');
-        //->middleware('role:Administrador'); 
+
 
 
 
@@ -67,13 +63,19 @@ Route::middleware('log.activity')->group(function () {
 
 
     // ADMINISTRADOR --------------------------------------------
-            Route::middleware(['roleCustom:Administrador'])->group(function () {
+        Route::middleware(['role:Administrador'])->group(function () {
+
+            Route::post('cama', [CamaController::class, 'create']);
+            Route::put('cama/{id}', [CamaController::class, 'update'])
+            -> where('id', '[0-9]+');
+            Route::delete('cama/{id}', [CamaController::class, 'delete'])
+            -> where('id', '[0-9]+');
 
              // pacientes
              Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
              Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
              ->where('nss', '[0-9]{11}');
 
-            });
         });
     });
+});
