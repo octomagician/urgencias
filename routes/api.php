@@ -32,19 +32,14 @@ Route::middleware('log.activity')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
-        // todos los gets
+        // lecturas para todos los usuarios
         Route::get('cama', [CamaController::class, 'index']);
-
-
-
-        
         Route::get('cama/{id?}', [CamaController::class, 'read'])
             -> where('id', '[0-9]+');
-        //al rato meto estos en ruta de admon
-        //cama
 
 
-
+            Route::put('cama/{id}', [CamaController::class, 'update'])
+            -> where('id', '[0-9]+');
 
 
 
