@@ -33,23 +33,18 @@ Route::middleware('log.activity')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
         // lecturas para todos los usuarios
-        Route::get('cama', [CamaController::class, 'index']);
-        Route::get('cama/{id?}', [CamaController::class, 'read'])
-            -> where('id', '[0-9]+');
+        Route::get('camas', [CamaController::class, 'index']);
+        Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
+        Route::get('diagnostico', [DiagnosticoController::class, 'index']);
+        Route::get('diagnostico/{id?}', [DiagnosticoController::class, 'read'])-> where('id', '[0-9]+');
 
 
-            Route::put('cama/{id}', [CamaController::class, 'update'])
-            -> where('id', '[0-9]+');
+            
 
 
 
         Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
             ->where('nss', '[0-9]{11}');
-        
-
-
-
-
         // perfil
         Route::get('v2/perfil', [PersonaController::class, 'perfil']);
         Route::put('v2/perfil', [PersonaController::class, 'actualizarPerfil']);
@@ -59,12 +54,17 @@ Route::middleware('log.activity')->group(function () {
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
+            Route::post('camas', [CamaController::class, 'create']);
+            Route::put('camas/{id}', [CamaController::class, 'update']) -> where('id', '[0-9]+');
+            Route::delete('camas/{id}', [CamaController::class, 'delete'])-> where('id', '[0-9]+');
+            
+            Route::post('diagnostico', [DiagnosticoController::class, 'create']);
+            Route::put('diagnostico/{id}', [DiagnosticoController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('diagnostico/{id}', [DiagnosticoController::class, 'delete'])-> where('id', '[0-9]+');
 
-            Route::post('cama', [CamaController::class, 'create']);
-            Route::put('cama/{id}', [CamaController::class, 'update'])
-            -> where('id', '[0-9]+');
-            Route::delete('cama/{id}', [CamaController::class, 'delete'])
-            -> where('id', '[0-9]+');
+
+
+
 
              // pacientes
              Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
