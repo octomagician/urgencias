@@ -35,8 +35,8 @@ Route::middleware('log.activity')->group(function () {
         // lecturas para todos los usuarios
         Route::get('camas', [CamaController::class, 'index']);
         Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
-        Route::get('diagnostico', [DiagnosticoController::class, 'index']);
-        Route::get('diagnostico/{id?}', [DiagnosticoController::class, 'read'])-> where('id', '[0-9]+');
+        Route::get('diagnosticos', [DiagnosticoController::class, 'index']);
+        Route::get('diagnosticos/{id?}', [DiagnosticoController::class, 'read'])-> where('id', '[0-9]+');
 
 
             
@@ -58,9 +58,9 @@ Route::middleware('log.activity')->group(function () {
             Route::put('camas/{id}', [CamaController::class, 'update']) -> where('id', '[0-9]+');
             Route::delete('camas/{id}', [CamaController::class, 'delete'])-> where('id', '[0-9]+');
             
-            Route::post('diagnostico', [DiagnosticoController::class, 'create']);
-            Route::put('diagnostico/{id}', [DiagnosticoController::class, 'update'])-> where('id', '[0-9]+');
-            Route::delete('diagnostico/{id}', [DiagnosticoController::class, 'delete'])-> where('id', '[0-9]+');
+            Route::post('diagnosticos', [DiagnosticoController::class, 'create']);
+            Route::put('diagnosticos/{id}', [DiagnosticoController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('diagnosticos/{id}', [DiagnosticoController::class, 'delete'])-> where('id', '[0-9]+');
 
 
 
