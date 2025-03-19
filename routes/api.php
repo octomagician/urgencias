@@ -30,6 +30,8 @@ Route::middleware('log.activity')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
         // lecturas para todos los usuarios
+        Route::get('pacientes/', [PacienteController::class, 'index']);
+        Route::get('pacientes/{id?}', [PacienteController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('camas', [CamaController::class, 'index']);
         Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('diagnosticos', [DiagnosticoController::class, 'index']);
@@ -64,6 +66,10 @@ Route::middleware('log.activity')->group(function () {
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
+            Route::post('pacientes', [PacienteController::class, 'create']);
+            Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])-> where('id', '[0-9]+'); 
+
             Route::post('camas', [CamaController::class, 'create']);
             Route::put('camas/{id}', [CamaController::class, 'update']) -> where('id', '[0-9]+');
             Route::delete('camas/{id}', [CamaController::class, 'delete'])-> where('id', '[0-9]+');
