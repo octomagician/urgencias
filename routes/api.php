@@ -39,9 +39,12 @@ Route::middleware('log.activity')->group(function () {
         Route::get('diagnosticos/{id?}', [DiagnosticoController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('areas/', [AreaController::class, 'index']);
         Route::get('areas/{id?}', [AreaController::class, 'read'])-> where('id', '[0-9]+');
-
-
-
+        Route::get('historial', [HistorialController::class, 'index']);
+        Route::get('historial/{id?}', [HistorialController::class, 'read'])-> where('id', '[0-9]+');
+        
+        
+        Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
+        Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
 
         Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
             ->where('nss', '[0-9]{11}');
@@ -66,8 +69,15 @@ Route::middleware('log.activity')->group(function () {
             Route::put('areas/{id}', [AreaController::class, 'update'])-> where('id', '[0-9]+'); 
             Route::delete('areas/{id}', [AreaController::class, 'delete'])-> where('id', '[0-9]+'); 
 
+            Route::post('historial', [HistorialController::class, 'create']);
+            Route::put('historial/{id}', [HistorialController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('historial/{id}', [HistorialController::class, 'delete'])-> where('id', '[0-9]+');
 
 
+
+            Route::post('ingresos', [IngresoController::class, 'create']);
+            Route::put('ingresos/{id}', [IngresoController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('ingresos/{id}', [IngresoController::class, 'delete'])-> where('id', '[0-9]+');
 
              // pacientes
              Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
