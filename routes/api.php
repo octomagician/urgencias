@@ -37,9 +37,9 @@ Route::middleware('log.activity')->group(function () {
         Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('diagnosticos', [DiagnosticoController::class, 'index']);
         Route::get('diagnosticos/{id?}', [DiagnosticoController::class, 'read'])-> where('id', '[0-9]+');
+        Route::get('areas/', [AreaController::class, 'index']);
+        Route::get('areas/{id?}', [AreaController::class, 'read'])-> where('id', '[0-9]+');
 
-
-            
 
 
 
@@ -62,6 +62,9 @@ Route::middleware('log.activity')->group(function () {
             Route::put('diagnosticos/{id}', [DiagnosticoController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('diagnosticos/{id}', [DiagnosticoController::class, 'delete'])-> where('id', '[0-9]+');
 
+            Route::post('areas', [AreaController::class, 'create']); 
+            Route::put('areas/{id}', [AreaController::class, 'update'])-> where('id', '[0-9]+'); 
+            Route::delete('areas/{id}', [AreaController::class, 'delete'])-> where('id', '[0-9]+'); 
 
 
 
