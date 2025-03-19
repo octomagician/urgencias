@@ -25,9 +25,6 @@ Route::middleware('log.activity')->group(function () {
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
     Route::post('entrar', [AuthController::class, 'entrar']);
 
-
-    
-
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
@@ -41,8 +38,18 @@ Route::middleware('log.activity')->group(function () {
         Route::get('areas/{id?}', [AreaController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('historial', [HistorialController::class, 'index']);
         Route::get('historial/{id?}', [HistorialController::class, 'read'])-> where('id', '[0-9]+');
+        Route::get('estudios', [EstudiosController::class, 'index']);
+        Route::get('estudios/{id?}', [EstudiosController::class, 'read'])-> where('id', '[0-9]+');
         
-        
+
+
+
+
+
+
+
+
+
         Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
         Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
 
@@ -72,6 +79,11 @@ Route::middleware('log.activity')->group(function () {
             Route::post('historial', [HistorialController::class, 'create']);
             Route::put('historial/{id}', [HistorialController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('historial/{id}', [HistorialController::class, 'delete'])-> where('id', '[0-9]+');
+
+            Route::post('estudios', [EstudiosController::class, 'create']);
+            Route::put('estudios/{id}', [EstudiosController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('estudios/{id}', [EstudiosController::class, 'delete'])-> where('id', '[0-9]+');
+
 
 
 
