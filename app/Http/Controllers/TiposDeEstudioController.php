@@ -12,7 +12,7 @@ class TiposDeEstudioController extends Controller
     {
         $tiposDeEstudio = TiposDeEstudio::all();
         return response()->json([
-            'tipos_de_estudio' => $tiposDeEstudio
+            'tipos-de-estudio' => $tiposDeEstudio
         ], 200);
     }
 
@@ -36,7 +36,7 @@ class TiposDeEstudioController extends Controller
         ]);
 
         return response()->json([
-            'tipo_de_estudio' => $tipoDeEstudio
+            'tipos-de-estudio' => $tipoDeEstudio
         ], 201);
     }
 
@@ -48,12 +48,12 @@ class TiposDeEstudioController extends Controller
                 return response()->json(['mensaje' => 'No encontrado'], 404);
             }
             return response()->json([
-                'tipo_de_estudio' => $tipoDeEstudio
+                'tipos-de-estudio' => $tipoDeEstudio
             ], 200);
         } else {
             $tiposDeEstudio = TiposDeEstudio::all();
             return response()->json([
-                'tipos_de_estudio' => $tiposDeEstudio
+                'tipos-de-estudio' => $tiposDeEstudio
             ], 200);
         }
     }
@@ -82,7 +82,7 @@ class TiposDeEstudioController extends Controller
 
         return response()->json([
             'mensaje' => 'Datos actualizados correctamente',
-            'tipo_de_estudio' => $tipoDeEstudio
+            'tipos-de-estudio' => $tipoDeEstudio
         ], 200);
     }
 

@@ -14,7 +14,7 @@ class TiposDePersonalController extends Controller
     {
         $tiposDePersonal = TiposDePersonal::all();
         return response()->json([
-            'tipos_de_personal' => $tiposDePersonal
+            'tipos-personal' => $tiposDePersonal
         ], 200);
     }
 
@@ -38,10 +38,10 @@ class TiposDePersonalController extends Controller
             'nombre' => $request->nombre
         ]);
 
-        Log::info('Tipo de personal creado exitosamente', ['tipo_de_personal' => $tipoDePersonal]);
+        Log::info('Tipo de personal creado exitosamente', ['tipos-personal' => $tipoDePersonal]);
 
         return response()->json([
-            'tipo_de_personal' => $tipoDePersonal
+            'tipos-personal' => $tipoDePersonal
         ], 201);
     }
 
@@ -53,12 +53,12 @@ class TiposDePersonalController extends Controller
                 return response()->json(['mensaje' => 'No encontrado'], 404);
             }
             return response()->json([
-                'tipo_de_personal' => $tipoDePersonal
+                'tipos-personal' => $tipoDePersonal
             ], 200);
         } else {
             $tiposDePersonal = TiposDePersonal::all();
             return response()->json([
-                'tipos_de_personal' => $tiposDePersonal
+                'tipos-personal' => $tiposDePersonal
             ], 200);
         }
     }
@@ -87,7 +87,7 @@ class TiposDePersonalController extends Controller
 
         return response()->json([
             'mensaje' => 'Datos actualizados correctamente',
-            'tipo_de_personal' => $tipoDePersonal
+            'tipos-personal' => $tipoDePersonal
         ], 200);
     }
 
