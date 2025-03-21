@@ -29,10 +29,16 @@ Route::middleware('log.activity')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
+        /*---------------------------------------*/
         Route::get('user/', [UserController::class, 'index']);
         Route::get('user/{id?}', [UserController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('pacientes/', [PacienteController::class, 'index']);
         Route::get('pacientes/{id?}', [PacienteController::class, 'read'])-> where('id', '[0-9]+');
+        /* no adecuado al cambio de personal
+        Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
+        Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
+        */
+        /*---------------------------------------*/
         Route::get('camas', [CamaController::class, 'index']);
         Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('diagnosticos', [DiagnosticoController::class, 'index']);
@@ -43,27 +49,15 @@ Route::middleware('log.activity')->group(function () {
         Route::get('historial/{id?}', [HistorialController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('estudios', [EstudiosController::class, 'index']);
         Route::get('estudios/{id?}', [EstudiosController::class, 'read'])-> where('id', '[0-9]+');
-        
-
-
-
-
-
-
-
-
-
-        Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
-        Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
-
-
-
-
-
+        Route::get('tipos-personal/', [TiposDePersonalController::class, 'index']);
+        Route::get('tipos-personal/{id?}', [TiposDePersonalController::class, 'read'])-> where('id', '[0-9]+'); 
+        Route::get('tipos-de-estudio', [TiposDeEstudioController::class, 'index']);
+        Route::get('tipos-de-estudio/{id?}', [TiposDeEstudioController::class, 'read'])-> where('id', '[0-9]+');
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
 
+            /*---------------------------------------*/
             Route::post('user', [UserController::class, 'create']);
             Route::put('user/{id}', [UserController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('user/{id}', [UserController::class, 'delete'])-> where('id', '[0-9]+');
@@ -71,6 +65,14 @@ Route::middleware('log.activity')->group(function () {
             Route::post('pacientes', [PacienteController::class, 'create']);
             Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])-> where('id', '[0-9]+'); 
+
+            /* no adecuado al cambio de personal
+            Route::post('ingresos', [IngresoController::class, 'create']);
+            Route::put('ingresos/{id}', [IngresoController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('ingresos/{id}', [IngresoController::class, 'delete'])-> where('id', '[0-9]+');
+            */
+
+            /*---------------------------------------*/
 
             Route::post('camas', [CamaController::class, 'create']);
             Route::put('camas/{id}', [CamaController::class, 'update']) -> where('id', '[0-9]+');
@@ -92,22 +94,13 @@ Route::middleware('log.activity')->group(function () {
             Route::put('estudios/{id}', [EstudiosController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('estudios/{id}', [EstudiosController::class, 'delete'])-> where('id', '[0-9]+');
 
+            Route::post('tipos-personal', [TiposDePersonalController::class, 'create']); 
+            Route::put('tipos-personal/{id}', [TiposDePersonalController::class, 'update'])-> where('id', '[0-9]+'); 
+            Route::delete('tipos-personal/{id}', [TiposDePersonalController::class, 'delete'])-> where('id', '[0-9]+'); 
 
-
-
-
-
-
-
-
-
-
-            Route::post('ingresos', [IngresoController::class, 'create']);
-            Route::put('ingresos/{id}', [IngresoController::class, 'update'])-> where('id', '[0-9]+');
-            Route::delete('ingresos/{id}', [IngresoController::class, 'delete'])-> where('id', '[0-9]+');
-
-
-
+            Route::post('tipos-de-estudio', [TiposDeEstudioController::class, 'create']); 
+            Route::put('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'update'])-> where('id', '[0-9]+'); 
+            Route::delete('tipos-de-estudio/{id}', [TiposDeEstudioController::class, 'delete'])-> where('id', '[0-9]+'); 
         });
     });
 });
