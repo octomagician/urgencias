@@ -3,43 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Log;
 
 class LogController extends Controller
 {
-    // Obtener todos los logs
     public function index()
     {
         $logs = Log::all();
-        return response()->json($logs);
+        return response()->json([
+            'logs' => $logs
+        ], 200);
     }
 
-    // Crear un nuevo log
-    public function store(Request $request)
+    public function read($id = null)
     {
-        $log = Log::create($request->all());
-        return response()->json($log, 201);
+        if ($id) {
+            $log = Log::find($id);
+            if (!$log) {
+                return response()->json(['mensaje' => 'No encontrado'], 404);
+            }
+            return response()->json([
+                'logs' => $log
+            ], 200);
+        } else {
+            $Log = Log::all();
+            return response()->json([
+                'logs' => $Log
+            ], 200);
+        }
     }
 
-    // Obtener un log por ID
-    public function show($id)
-    {
-        $log = Log::find($id);
-        return response()->json($log);
-    }
-
-    // Actualizar un log
-    public function update(Request $request, $id)
-    {
-        $log = Log::findOrFail($id);
-        $log->update($request->all());
-        return response()->json($log, 200);
-    }
-
-    // Eliminar un log
-    public function destroy($id)
-    {
-        Log::findOrFail($id)->delete();
-        return response()->json(null, 204);
-    }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
+use App\Http\Controllers\LogController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 
 Route::middleware('log.activity')->group(function () {
@@ -56,6 +57,9 @@ Route::middleware('log.activity')->group(function () {
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
+
+            Route::get('log/', [LogController::class, 'index']);
+            Route::get('log/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
 
             /*---------------------------------------*/
             Route::post('user', [UserController::class, 'create']);
