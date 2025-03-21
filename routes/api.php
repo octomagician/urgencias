@@ -58,8 +58,8 @@ Route::middleware('log.activity')->group(function () {
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
 
-            Route::get('log/', [LogController::class, 'index']);
-            Route::get('log/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
+            Route::get('logs/', [LogController::class, 'index']);
+            Route::get('logs/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
 
             /*---------------------------------------*/
             Route::post('user', [UserController::class, 'create']);
