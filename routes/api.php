@@ -29,7 +29,8 @@ Route::middleware('log.activity')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
 
-        // lecturas para todos los usuarios
+        Route::get('user/', [UserController::class, 'index']);
+        Route::get('user/{id?}', [UserController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('pacientes/', [PacienteController::class, 'index']);
         Route::get('pacientes/{id?}', [PacienteController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('camas', [CamaController::class, 'index']);
@@ -55,17 +56,18 @@ Route::middleware('log.activity')->group(function () {
         Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
         Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
 
-        Route::get('v2/paciente/{nss}', [PacienteController::class, 'getPacienteByNss'])
-            ->where('nss', '[0-9]{11}');
-        // perfil
-        Route::get('v2/perfil', [PersonaController::class, 'perfil']);
-        Route::put('v2/perfil', [PersonaController::class, 'actualizarPerfil']);
-        Route::post('v2/resetPassword', [AuthController::class, 'resetPassword']);
+
+
 
 
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
+
+            Route::post('user', [UserController::class, 'create']);
+            Route::put('user/{id}', [UserController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('user/{id}', [UserController::class, 'delete'])-> where('id', '[0-9]+');
+        
             Route::post('pacientes', [PacienteController::class, 'create']);
             Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])-> where('id', '[0-9]+'); 
@@ -93,14 +95,18 @@ Route::middleware('log.activity')->group(function () {
 
 
 
+
+
+
+
+
+
+
             Route::post('ingresos', [IngresoController::class, 'create']);
             Route::put('ingresos/{id}', [IngresoController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('ingresos/{id}', [IngresoController::class, 'delete'])-> where('id', '[0-9]+');
 
-             // pacientes
-             Route::post('v2/paciente', [PacienteController::class, 'nuevoIngreso']);
-             Route::put('v2/paciente/{nss}', [PacienteController::class, 'updatePaciente'])
-             ->where('nss', '[0-9]{11}');
+
 
         });
     });

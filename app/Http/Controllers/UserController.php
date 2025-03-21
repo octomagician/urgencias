@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UsuarioRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\UsuarioRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -31,159 +31,148 @@ use Spatie\Permission\Traits\HasRoles;
 
 use Illuminate\Support\Facades\Storage;
 use App\Models\Persona;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
-{ 
-    use Notifiable, HasRoles;
-
-    public function create(UsuarioRequest $request){
-    
-        \DB::beginTransaction();
-
-        $persona = Persona::create([
-            'nombre' => $request->nombre,
-            'apellido_paterno' => $request->apellido_paterno,
-            'apellido_materno' => $request->apellido_materno,
-            'sexo' => $request->sexo,
-        ]);
-
-        $user = User::create([
-            'persona_id' => $persona->id,
-            'tipo_id' => $request->tipo_id,
-            'username' => $request->username,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'verification_code' => Str::random(6), // Generar un código de 6 caracteres
-            'verification_code_expires_at' => Carbon::now()->addMinutes(5), // Código válido por 5 minutos
-        ]);
-
-        if (!$user) {
+{
+    public function index()
+    {
+        try {
+            $users = User::with('persona')->get();
             return response()->json([
-                'mensaje' => 'No se pudo crear el usuario'
+                'users' => $users
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al obtener los usuarios: ' . $e->getMessage()
             ], 500);
         }
-    
-        $user->assignRole('guest');
-    
-        if (isset($user)) { 
+    }
+
+    public function create(UsuarioRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            // Crear la persona
+            $persona = Persona::create([
+                'nombre' => $request->nombre,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
+                'sexo' => $request->sexo,
+            ]);
+
+            // Crear el usuario
+            $user = User::create([
+                'persona_id' => $persona->id,
+                'tipo_id' => $request->tipo_id,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'verification_code' => Str::random(6),
+                'verification_code_expires_at' => Carbon::now()->addMinutes(5),
+            ]);
+
+            // Asignar rol de invitado
+            $user->assignRole('guest');
+
+            // Enviar correo de verificación
             $frontendUri = config('app.frontend_uri');
-            // Enviar el correo de registro con el código de verificación
             Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Registro exitoso', $user->verification_code, $frontendUri));
 
-            // Confirmar la transacción
-            \DB::commit();
-            
+            DB::commit();
+
             return response()->json([
                 'mensaje' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
                 'user' => $user,
+                'persona' => $persona,
             ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error al crear el usuario: ' . $e->getMessage()
+            ], 500);
         }
     }
 
     public function read($id = null)
     {
-        try { 
+        try {
             if ($id) {
-                $user = User::find($id);
-                if (!$user) {
-                    return response()->json(['message' => 'Usuario no encontrado'], 404);
-                }
+                $user = User::with('persona')->findOrFail($id);
+                return response()->json([
+                    'user' => $user,
+                ], 200);
             } else {
-                $user = User::all();
+                $users = User::with('persona')->get();
+                return response()->json([
+                    'users' => $users,
+                ], 200);
             }
-            return response()->json($user, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        }  
-    }
-
-    public function index()
-    {
-        try { 
-            $users = User::all();
-            return response()->json($users, 200);
-        } catch (\Illuminate\Database\QueryException $e) { 
-            return response()->json(['error' => 'Error al consultar los datos de la base de datos.'], 500);
-        } catch (\Exception $e) { 
-            return response()->json(['error' => 'Ocurrió un error inesperado. Por favor, intenta de nuevo más tarde.'], 500);
+            return response()->json([
+                'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+            ], 404);
         }
     }
-    
-    public function update(Request $request, $id)
+
+    public function update(UsuarioRequest $request, $id)
     {
-        try { 
-            $user = User::find($id);
-            $user->update($request->all());
-            return response()->json($user);
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+            $persona = $user->persona;
+
+            // Actualizar la persona
+            $persona->update([
+                'nombre' => $request->nombre,
+                'apellido_paterno' => $request->apellido_paterno,
+                'apellido_materno' => $request->apellido_materno,
+                'sexo' => $request->sexo,
+            ]);
+
+            // Actualizar el usuario
+            $user->update([
+                'tipo_id' => $request->tipo_id,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => $request->password ? Hash::make($request->password) : $user->password,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'mensaje' => 'Usuario y persona actualizados correctamente.',
+                'user' => $user,
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        } 
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error al actualizar el usuario: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function delete($id)
     {
-        try { 
-            $user = User::find($id);
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+            $persona = $user->persona;
+
+            // Eliminar el usuario y la persona
             $user->delete();
-            return response()->json(['message' => 'Usuario eliminado'], 204);
+            $persona->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'mensaje' => 'Usuario y persona eliminados correctamente.'
+            ], 204);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
-        } 
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error al eliminar el usuario: ' . $e->getMessage()
+            ], 500);
+        }
     }
-
-    public function uploadPP(Request $request)
-    {
-        $user = Auth::user();
-    
-        if (!$user) {
-            return response()->json(['error' => 'Usuario no autenticado'], 401);
-        }
-
-       $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        /* $user = Auth::user(); */
-
-        if ($user->profile_photo_path) {
-            Storage::disk('spaces')->delete($user->profile_photo_path);
-        }
-
-        $path = $request->file('photo')->store('profile_pictures', 'spaces');
-        $user->update(['profile_photo_path' => $path]);
-
-        $photoUrl = Storage::disk('spaces')->url($path);
-
-        return response()->json(['message' => 'Foto de perfil actualizada', 'photo_url' => $photoUrl]);
-    }
-
-    public function deletePP()
-    {
-        $user = Auth::user();
-    
-        if (!$user) {
-            return response()->json(['error' => 'Usuario no autenticado'], 401);
-        }
-
-        if ($user->profile_photo_path) {
-            Storage::disk('spaces')->delete($user->profile_photo_path);
-            $user->update(['profile_photo_path' => null]);
-            return response()->json(['message' => 'Foto de perfil eliminada']);
-        }
-        return response()->json(['error' => 'No hay foto de perfil para eliminar'], 404);
-    }
-
-    public function downloadPP()
-    {
-        $user = Auth::user();
-
-        if (!$user->profile_photo_path || !Storage::disk('spaces')->exists($user->profile_photo_path)) {
-            return response()->json(['error' => 'Foto de perfil no encontrada'], 404);
-        }
-
-        $fileContent = Storage::disk('spaces')->get($user->profile_photo_path);
-
-        return response($fileContent)->header('Content-Type', 'image/png');
-    }
-
 }
