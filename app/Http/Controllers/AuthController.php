@@ -169,13 +169,13 @@ class AuthController extends Controller
             'token' => $token,
             'role' => $role,
             'username' => $user->username 
-        ], 200);
+        ], 200)->cookie('token', $token, 60, null, null, true, true); // httpOnly y secure
     }
 
     public function salir(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['mensaje' => 'Sesión cerrada correctamente.'], 200);
+        return response()->json(['mensaje' => 'Sesión cerrada correctamente.'], 200)->withoutCookie('token');
     }
 
     public function resetPassword(Request $request)

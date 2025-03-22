@@ -63,4 +63,13 @@ class Handler extends ExceptionHandler
             'mensaje' => 'Necesitas iniciar sesión para poder ver esto.',
         ], 401);
     }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+            return response()->json(['mensaje' => 'No tienes permisos'], 403);
+        }
+
+        return parent::render($request, $exception);
+    }
 }

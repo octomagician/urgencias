@@ -13,30 +13,30 @@ class RoleMiddleware
     {
         // Si no se pasan roles, denegar acceso
         if (empty($roles)) {
-            Log::info("Acceso denegado: No se especificaron roles.");
+            Log::warning("Acceso denegado: No se especificaron roles.");
             throw UnauthorizedException::forRoles($roles);
         }
 
         // Obtiene el usuario autenticado
         $user = $request->user();
-        //dd($user);
 
         // Si no hay usuario autenticado, denegar acceso
         if (!$user) {
-            Log::info("Acceso denegado: Usuario no autenticado.");
+            Log::warning("Acceso denegado: Usuario no autenticado.");
             throw UnauthorizedException::forRoles($roles);
         }
 
         // Verifica si el usuario tiene al menos uno de los roles requeridos
         foreach ($roles as $role) {
-            if ($user->hasRole(trim($role))) { // Usa trim para eliminar espacios en blanco
+            $role = trim($role); // Elimina espacios en blanco
+            if ($user->hasRole($role)) {
                 Log::info("Acceso permitido para el rol: $role. Usuario: " . $user->name);
                 return $next($request);
             }
         }
 
         // Si el usuario no tiene ninguno de los roles, denegar acceso
-        Log::info("Acceso denegado para los roles requeridos: " . implode(', ', $roles) . ". Usuario actual: " . $user->name);
+        Log::warning("Acceso denegado para los roles requeridos: " . implode(', ', $roles) . ". Usuario actual: " . $user->name);
         throw UnauthorizedException::forRoles($roles);
     }
 }
