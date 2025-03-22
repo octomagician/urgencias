@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'apiv2/*'], // Asegúrate de incluir 'apiv2/*'
+    'paths' => ['api/*'],
     'allowed_methods' => ['*'], // Permite todos los métodos HTTP
-    'allowed_origins' => ['*'], // Permite todos los orígenes (en desarrollo)
+    'allowed_origins' => ['http://localhost:4200'],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'], // Permite todos los encabezados
     'exposed_headers' => [],
