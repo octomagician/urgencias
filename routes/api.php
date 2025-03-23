@@ -27,8 +27,12 @@ Route::middleware('log.activity')->group(function () {
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
     Route::post('entrar', [AuthController::class, 'entrar']);
 
+    Route::get('/es-admin', [AuthController::class, 'esAdmin']);
+    Route::get('/esta-autenticado', [AuthController::class, 'estaAutenticado']);
+
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
+        
         Route::delete('salir', [AuthController::class, 'salir']);
 
         /*---------------------------------------*/

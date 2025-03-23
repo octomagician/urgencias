@@ -79,7 +79,7 @@ class AuthController extends Controller
             return response()->json(['mensaje' => 'Cuenta activada exitosamente'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error al activar cuenta: " . $e->getMessage());
+            Log::error("Error al activar cuenta: " . $e->getmensaje());
             return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
         }
     }
@@ -169,7 +169,16 @@ class AuthController extends Controller
             'token' => $token,
             'role' => $role,
             'username' => $user->username 
-        ], 200)->cookie('token', $token, 60, null, null, true, true); // httpOnly y secure
+        ], 200)->cookie('token', $token, 60, null, null, true, false); // httpOnly y secure
+                        /*nombre de la cookie, 
+                                valor, 
+                                        duración en minutos, 
+                                            path, estará disponible en todo el dominio, 
+                                                    domain disponible en el dominio actual, 
+                                                        secure,, solo accesible a través de http 
+                                                                true: que solo se pueda acceder a través de https
+                                                                ponemos false porque no estamos para esas cosas
+                                                                */
     }
 
     public function salir(Request $request)
@@ -192,7 +201,7 @@ class AuthController extends Controller
         // Si la validación falla, devolver errores
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Error de validación',
+                'mensaje' => 'Error de validación',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -200,7 +209,7 @@ class AuthController extends Controller
         // Verificar que la contraseña actual sea correcta
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
-                'message' => 'La contraseña actual es incorrecta',
+                'mensaje' => 'La contraseña actual es incorrecta',
             ], 401);
         }
     
@@ -210,7 +219,22 @@ class AuthController extends Controller
     
         // Devolver una respuesta exitosa
         return response()->json([
-            'message' => 'Contraseña cambiada correctamente',
+            'mensaje' => 'Contraseña cambiada correctamente',
         ], 200);
     }
+
+    public function esAdmin(Request $request)
+{
+    // Verifica si el usuario está autenticado y tiene el rol de administrador
+    if ($request->user() && $request->user()->role === 'Administrador') {
+        return response()->json(true);
+    }
+    return response()->json(false);
+}
+
+public function estaAutenticado(Request $request)
+{
+    // Verifica si el usuario está autenticado
+    return response()->json($request->user() ? true : false);
+}
 }
