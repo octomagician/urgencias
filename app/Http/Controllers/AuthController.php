@@ -169,16 +169,17 @@ class AuthController extends Controller
             'token' => $token,
             'role' => $role,
             'username' => $user->username 
-        ], 200)->cookie('token', $token, 60, null, null, true, false); // httpOnly y secure
-                        /*nombre de la cookie, 
-                                valor, 
-                                        duración en minutos, 
-                                            path, estará disponible en todo el dominio, 
-                                                    domain disponible en el dominio actual, 
-                                                        secure,, solo accesible a través de http 
-                                                                true: que solo se pueda acceder a través de https
-                                                                ponemos false porque no estamos para esas cosas
-                                                                */
+        ], 200)->cookie(
+                'token',       // Nombre de la cookie
+                $token,        // Valor de la cookie
+                60,            // Tiempo de expiración en minutos
+                null,          // Path (null = disponible en todo el dominio)
+                null,          // Dominio (null = dominio actual)
+                false,         // Secure (false = permite HTTP en local)
+                true,         // HttpOnly (false = permite acceso desde JavaScript)
+                false,         // Raw (false = codifica el valor de la cookie)
+                'lax'          // SameSite (solo permite GET seguros entre sitios)
+                );
     }
 
     public function salir(Request $request)
@@ -223,18 +224,35 @@ class AuthController extends Controller
         ], 200);
     }
 
+    /*
     public function esAdmin(Request $request)
-{
-    // Verifica si el usuario está autenticado y tiene el rol de administrador
-    if ($request->user() && $request->user()->role === 'Administrador') {
-        return response()->json(true);
+    {
+        // Verifica si el usuario está autenticado y tiene el rol de administrador
+        if ($request->user() && $request->user()->roles->first()->name === 'Administrador') {
+            return response()->json(true);
+        }
+        return response()->json(false);
     }
-    return response()->json(false);
-}
+        */
 
-public function estaAutenticado(Request $request)
-{
-    // Verifica si el usuario está autenticado
-    return response()->json($request->user() ? true : false);
-}
+    public function esAdmin(Request $request)
+    {
+        // Verifica autenticación por Sanctum (token) o por sesión (cookies)
+        $user = $request->user('sanctum') ?? auth()->user();
+        
+        // Verifica si es admin (con comprobación segura de relaciones)
+        if ($user && $user->roles->contains('name', 'Administrador')) {
+            return response()->json(true);
+        }
+        
+        return response()->json(false);
+    }
+
+    public function estaAutenticado(Request $request)
+    {
+        // Verifica tanto la sesión por cookies (SPA) como el token API
+        $isAuthenticated = auth('sanctum')->check() || auth()->check();
+        
+        return response()->json($isAuthenticated);
+    }
 }
