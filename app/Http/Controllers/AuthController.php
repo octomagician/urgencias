@@ -244,7 +244,7 @@ class AuthController extends Controller
         if ($user && $user->roles->contains('name', 'Administrador')) {
             return response()->json(true);
         }
-        
+
         return response()->json(false);
     }
 

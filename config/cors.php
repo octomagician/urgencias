@@ -1,7 +1,11 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie',
+    'entrar',
+    'salir',
+    'esta-autenticado',
+    'es-admin'],
     'allowed_methods' => ['*'], // Permite todos los métodos HTTP
     'allowed_origins' => ['http://localhost:4200'],
     'allowed_origins_patterns' => [],
