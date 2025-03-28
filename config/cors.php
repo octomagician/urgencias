@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'apiv2/*'], // Asegúrate de incluir 'apiv2/*'
+    'paths' => ['api/*', 'eventos-sse'], // Asegúrate de incluir 'apiv2/*'
     'allowed_methods' => ['*'], // Permite todos los métodos HTTP
     'allowed_origins' => ['*'], // Permite todos los orígenes (en desarrollo)
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['*'], // Permite todos los encabezados
+    'allowed_headers' => ['*', 'Authorization', 'Accept', 'Content-Type'], // Permite todos los encabezados
     'exposed_headers' => [],
     'max_age' => 0,
     'supports_credentials' => false,

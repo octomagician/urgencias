@@ -16,7 +16,16 @@ use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\TiposDeEstudioController;
 use App\Http\Controllers\EstudiosController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\EventosSSEController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/eventos-sse', [EventosSSEController::class, 'streamEventos']);
+    Route::middleware(['role:Administrador'])->group(function () {
+        Route::get('logs/', [LogController::class, 'index']);
+        Route::get('logs/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
+    });
+});
 
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
@@ -57,11 +66,6 @@ Route::middleware('log.activity')->group(function () {
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
-
-            Route::get('logs/', [LogController::class, 'index']);
-            Route::get('logs/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
-
-            /*---------------------------------------*/
             Route::post('user', [UserController::class, 'create']);
             Route::put('user/{id}', [UserController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('user/{id}', [UserController::class, 'delete'])-> where('id', '[0-9]+');

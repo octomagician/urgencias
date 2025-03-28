@@ -70,7 +70,8 @@ return [
             'database' => env('MONGODB_DATABASE', 'urgencias'),
             'username' => env('MONGODB_USERNAME', ''),
             'password' => env('MONGODB_PASSWORD', ''), 
-            'dsn' => env('DB_URI')
+            'dsn' => env('DB_URI'),
+            'timeout' => 30000, // 30 segundos timeout para consultas
         ],
 
         'pgsql' => [
