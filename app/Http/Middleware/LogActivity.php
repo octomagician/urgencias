@@ -25,6 +25,7 @@ class LogActivity
                 'action' => $request->route()?->getActionName() ?? 'unknown',
                 'user_id' => Auth::id(),
                 'details' => json_encode($request->all() ?: []),
+                'created_at' => now(),
             ];
 
             try {

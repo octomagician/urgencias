@@ -63,7 +63,7 @@ class EventosSSEController extends Controller
                                 'action' => $log->action,
                                 'user_id' => $log->user_id,
                                 'details' => $log->details,
-                                'timestamp' => $log->created_at->toDateTimeString()
+                                'created_at' => $log->created_at->toDateTimeString()
                             ]) . "\n\n";
                             $lastSentId = $log->_id;
                         }
