@@ -28,6 +28,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+
+
+
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
@@ -70,6 +73,7 @@ Route::middleware('log.activity')->group(function () {
         
             Route::post('pacientes', [PacienteController::class, 'create']);
             Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
+            Route::put('pacientes-update/{id}', [PacienteController::class, 'test'])-> where('id', '[0-9]+');
             Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])-> where('id', '[0-9]+'); 
 
             Route::post('ingresos', [IngresoController::class, 'create']);
