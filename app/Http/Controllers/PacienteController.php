@@ -10,9 +10,14 @@ class PacienteController extends Controller
 {
     public function index()
     {
-        $pacientes = Paciente::all();
+        $pacientes = Paciente::with('persona')->get();
+        
         return response()->json([
-            'pacientes' => $pacientes
+            'pacientes' => $pacientes->map(function ($paciente) {
+                return [
+                    'paciente' => $paciente,
+                ];
+            })
         ], 200);
     }
 

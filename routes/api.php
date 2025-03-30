@@ -45,11 +45,8 @@ Route::middleware('log.activity')->group(function () {
         Route::get('user/{id?}', [UserController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('pacientes/', [PacienteController::class, 'index']);
         Route::get('pacientes/{id?}', [PacienteController::class, 'read'])-> where('id', '[0-9]+');
-        /* no adecuado al cambio de personal
-        Route::get('ingresos/{id?}', [IngresoController::class, 'index']);
+        Route::get('ingresos/', [IngresoController::class, 'index']);
         Route::get('ingresos/{id?}', [IngresoController::class, 'read'])-> where('id', '[0-9]+');
-        */
-        /*---------------------------------------*/
         Route::get('camas', [CamaController::class, 'index']);
         Route::get('camas/{id?}', [CamaController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('diagnosticos', [DiagnosticoController::class, 'index']);
@@ -75,13 +72,9 @@ Route::middleware('log.activity')->group(function () {
             Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('pacientes/{id}', [PacienteController::class, 'delete'])-> where('id', '[0-9]+'); 
 
-            /* no adecuado al cambio de personal
             Route::post('ingresos', [IngresoController::class, 'create']);
             Route::put('ingresos/{id}', [IngresoController::class, 'update'])-> where('id', '[0-9]+');
             Route::delete('ingresos/{id}', [IngresoController::class, 'delete'])-> where('id', '[0-9]+');
-            */
-
-            /*---------------------------------------*/
 
             Route::post('camas', [CamaController::class, 'create']);
             Route::put('camas/{id}', [CamaController::class, 'update']) -> where('id', '[0-9]+');
