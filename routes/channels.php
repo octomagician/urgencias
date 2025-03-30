@@ -16,3 +16,14 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+// Canal público para actualizaciones de historial
+// No requiere autenticación específica
+Broadcast::channel('historial', function ($user) {
+    // Si quieres limitar el acceso, puedes añadir condiciones aquí
+    // Por ejemplo, solo usuarios autenticados:
+    return !is_null($user);
+    
+    // O para permitir a todos (incluso no autenticados):
+    // return true;
+});

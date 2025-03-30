@@ -21,6 +21,7 @@ use Spatie\Permission\Middlewares\RoleMiddleware;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/eventos-sse', [EventosSSEController::class, 'streamEventos']);
+
     Route::middleware(['role:Administrador'])->group(function () {
         Route::get('logs/', [LogController::class, 'index']);
         Route::get('logs/{id?}', [LogController::class, 'read'])->where('id', '^[a-fA-F0-9]{24}$');
