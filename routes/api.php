@@ -28,9 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-
-
-
 Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
@@ -42,6 +39,9 @@ Route::middleware('log.activity')->group(function () {
     // USER --------------------------------------------
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('salir', [AuthController::class, 'salir']);
+        Route::put('perfil', [UserController::class, 'updateSelf']);
+        Route::post('resetPassword', [AuthController::class, 'resetPassword']);
+        Route::delete('perfil', [UserController::class, 'deleteSelf']);
 
         /*---------------------------------------*/
         Route::get('user/', [UserController::class, 'index']);

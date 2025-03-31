@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UsuarioRequest;
+use App\Http\Requests\SelfUsuarioRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -175,4 +176,73 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function updateSelf(SelfUsuarioRequest $request)
+{
+    DB::beginTransaction();
+    try {
+        $user = auth()->user();
+        $persona = $user->persona;
+
+        // Actualizar la persona
+        $persona->update($request->only([
+            'nombre', 
+            'apellido_paterno', 
+            'apellido_materno', 
+            'sexo'
+        ]));
+
+        // Preparar datos del usuario
+        $userData = $request->only([
+            'tipo_id',
+            'username',
+            'email'
+        ]);
+
+        // Actualizar contraseña solo si se proporcionó
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        // Actualizar el usuario
+        $user->update($userData);
+
+        DB::commit();
+
+        return response()->json([
+            'mensaje' => 'Usuario y persona actualizados correctamente.',
+            'user' => $user->fresh(),
+        ], 200);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => 'Error al actualizar el usuario: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function deleteSelf()
+{
+    DB::beginTransaction();
+    try {
+        // Obtener el usuario autenticado
+        $user = auth()->user();
+        $persona = $user->persona;
+
+        // Eliminar el usuario y la persona
+        $user->delete();
+        $persona->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'mensaje' => 'Usuario y persona eliminados correctamente.'
+        ], 204);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => 'Error al eliminar el usuario: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }
