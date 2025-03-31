@@ -45,8 +45,8 @@ Route::middleware('log.activity')->group(function () {
         Route::delete('perfil', [UserController::class, 'deleteSelf']);
 
         /*---------------------------------------*/
-        Route::get('user/', [UserController::class, 'index']);
-        Route::get('user/{id?}', [UserController::class, 'read'])-> where('id', '[0-9]+');
+        Route::get('users/', [UserController::class, 'index']);
+        Route::get('users/{id?}', [UserController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('pacientes/', [PacienteController::class, 'index']);
         Route::get('pacientes/{id?}', [PacienteController::class, 'read'])-> where('id', '[0-9]+');
         Route::get('ingresos/', [IngresoController::class, 'index']);
@@ -68,9 +68,9 @@ Route::middleware('log.activity')->group(function () {
 
     // ADMINISTRADOR --------------------------------------------
         Route::middleware(['role:Administrador'])->group(function () {
-            Route::post('user', [UserController::class, 'create']);
-            Route::put('user/{id}', [UserController::class, 'update'])-> where('id', '[0-9]+');
-            Route::delete('user/{id}', [UserController::class, 'delete'])-> where('id', '[0-9]+');
+            Route::post('users', [UserController::class, 'create']);
+            Route::put('users/{id}', [UserController::class, 'update'])-> where('id', '[0-9]+');
+            Route::delete('users/{id}', [UserController::class, 'delete'])-> where('id', '[0-9]+');
         
             Route::post('pacientes', [PacienteController::class, 'create']);
             Route::put('pacientes/{id}', [PacienteController::class, 'update'])-> where('id', '[0-9]+');
