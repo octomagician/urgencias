@@ -177,6 +177,21 @@ class UserController extends Controller
         }
     }
 
+    public function readSelf()
+{
+    try {
+        $user = auth()->user()->load('persona');
+        
+        return response()->json([
+            'user' => $user,
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al obtener el usuario: ' . $e->getMessage()
+        ], 404);
+    }
+}
+
     public function updateSelf(SelfUsuarioRequest $request)
 {
     DB::beginTransaction();
