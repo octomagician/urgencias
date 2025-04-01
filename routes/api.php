@@ -42,7 +42,7 @@ Route::middleware('log.activity')->group(function () {
         Route::get('perfil', [UserController::class, 'readSelf']);
         Route::put('perfil', [UserController::class, 'updateSelf']);
         Route::post('resetPassword', [AuthController::class, 'resetPassword']);
-        Route::delete('perfil', [UserController::class, 'deleteSelf']);
+        //Route::delete('perfil', [UserController::class, 'deleteSelf']);
 
         /*---------------------------------------*/
         Route::get('users/', [UserController::class, 'index']);
