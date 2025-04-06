@@ -23,7 +23,8 @@ class User extends Authenticatable // extender Authenticatable
     'password',
     'profile_photo_path',
     'verification_code',
-    'verification_code_expires_at',];
+    'verification_code_expires_at'
+];
 
     protected $table = 'users';
 
@@ -34,6 +35,7 @@ class User extends Authenticatable // extender Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'verification_code_expires_at' => 'datetime',
     ];
 
     public function persona()

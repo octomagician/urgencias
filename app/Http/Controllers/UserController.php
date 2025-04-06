@@ -33,6 +33,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Persona;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -50,7 +51,7 @@ class UserController extends Controller
         }
     }
 
-    public function create(UsuarioRequest $request)
+    public function create(UsuarioRequest $request) 
     {
         DB::beginTransaction();
         try {
@@ -61,7 +62,7 @@ class UserController extends Controller
                 'apellido_materno' => $request->apellido_materno,
                 'sexo' => $request->sexo,
             ]);
-
+    
             // Crear el usuario
             $user = User::create([
                 'persona_id' => $persona->id,
@@ -70,18 +71,51 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'verification_code' => Str::random(6),
-                'verification_code_expires_at' => Carbon::now()->addMinutes(5),
+                'verification_code_expires_at' => now()->addMinutes(5)
             ]);
-
+    
             // Asignar rol de invitado
             $user->assignRole('guest');
-
+    
+            // Generar URL firmada para verificación
+            $verificationUrl = URL::temporarySignedRoute(
+                'verificar-codigo', // Nombre de la ruta de verificación en tu API
+                Carbon::now()->addMinutes(5), // Tiempo de expiración
+                [
+                    'id' => $user->id,
+                    'hash' => sha1($user->email),
+                    'code' => $user->verification_code
+                ] //pasas el id y el hash como medida de seguridad estandar
+            );
+    
+            // Obtengo la URI del front desde app.php http://localhost:4200
+            // le añado los parámetros de la url firmada del backend
+            // y el código de verificación. Lo paso para que se muestre en el correo por si el enlace falla
+            // y para que el front pueda autocompletar el formulario
+            $frontendUri = config('app.frontend_uri') . '/verificacion?'
+                . http_build_query([
+                'code' => $user->verification_code,
+                'verify_url' => $verificationUrl,
+                'expires_at' => Carbon::now()->addMinutes(5)->timestamp,
+                ]);
+    
             // Enviar correo de verificación
-            $frontendUri = config('app.frontend_uri');
-            Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Registro exitoso', $user->verification_code, $frontendUri));
-
+            Mail::to($user->email)->send(new RegistroCodigoCorreo(
+                $user, 
+                'Registro exitoso', 
+                $user->verification_code, 
+                $frontendUri
+            ));
+    
             DB::commit();
 
+            \Log::debug('Datos mandados al front:', [
+                'frontendUri' =>  $frontendUri,
+                'code' => $user->verification_code,
+                'verify_url' => $verificationUrl,
+                'expires_at' => Carbon::now()->addMinutes(5)->timestamp,
+            ]);
+    
             return response()->json([
                 'mensaje' => 'Usuario creado, favor de revisar su correo para seguir con el proceso.',
                 'user' => $user,

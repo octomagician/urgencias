@@ -34,7 +34,7 @@ class RegistroCodigoCorreo extends Mailable
                         'user' => $this->user,
                         'contenido' => $this->contenido,
                         'verificationCode' => $this->verificationCode,
-                        'frontendUri' => $this->frontendUri,
+                        'frontendUri' => $this->frontendUri
                     ]);
     }
 
@@ -49,4 +49,4 @@ class RegistroCodigoCorreo extends Mailable
     {
         return [];
     }
-}
+} 

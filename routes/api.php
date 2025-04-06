@@ -32,7 +32,10 @@ Route::middleware('log.activity')->group(function () {
     // GUEST --------------------------------------------
     Route::post('registrar', [UserController::class, 'create']);
     Route::get('puesto', [TiposDePersonalController::class, 'index']); //para el dropdown
-    Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
+
+    // Ruta firmada para verificación
+    Route::get('/email/verify', [AuthController::class, 'verificarCodigo'])->name('verificar-codigo');
+    //Route::post('/verificar-codigo', [AuthController::class, 'verificarCodigo']);
     Route::post('/reenviar-codigo', [AuthController::class, 'reenviarCodigo']);
     Route::post('entrar', [AuthController::class, 'entrar']);
 

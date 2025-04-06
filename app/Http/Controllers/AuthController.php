@@ -24,104 +24,142 @@ class AuthController extends Controller
 {
     public function verificarCodigo(Request $request)
     {
-        // Validar manualmente
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'codigo' => 'required|string|size:6',
-        ], [
-            'email.required' => 'El campo correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
-            'codigo.required' => 'El campo código es obligatorio.',
-            'codigo.string' => 'El código debe ser una cadena de texto.',
-            'codigo.size' => 'El código debe tener exactamente 6 caracteres.',
+        \Log::debug('Datos recibidos:', [
+            'params' => $request->all(),
+            'firma_valida' => $request->hasValidSignature(),
+            'url_completa' => $request->fullUrl()
         ]);
 
-        // Si la validación falla, devolver una respuesta JSON
-        if ($validator->fails()) {
-            return response()->json([
-                'mensaje' => 'Error de validación',
-                'errores' => $validator->errors(),
-            ], 422);
+        // 1. Validar firma (incluye tiempo de expiración)
+        if (!$request->hasValidSignature()) {
+            abort(401, 'Enlace inválido o expirado');
+        }
+    
+        // 2. Obtener parámetros necesarios
+        if (!$request->has(['id', 'hash', 'code'])) {
+            abort(422, 'Parámetros incompletos');
+        }
+    
+        // 3. Buscar usuario
+        $user = User::findOrFail($request->id);
+    
+        // 4. Validar hash del email
+        if (sha1($user->email) !== $request->hash) {
+            abort(403, 'No autorizado');
         }
 
-        // Buscar al usuario por correo electrónico
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json(['mensaje' => 'Usuario no encontrado'], 404);
+        if ($user->verification_code_expires_at < now()) {
+            abort(410, 'El código ha expirado'); // 410 Gone
         }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
+    
+        // 5. Validar código
+        if ($user->verification_code !== $request->code) {
+            abort(422, 'Código de verificación incorrecto');
         }
-
-        // Verificar el código
-        if ($user->verification_code !== $request->codigo) {
-            return response()->json(['mensaje' => 'Código de verificación incorrecto'], 400);
-        }
-
-        // Verificar si el código ha expirado
-        if (Carbon::now()->gt($user->verification_code_expires_at)) {
-            return response()->json(['mensaje' => 'El código ha expirado'], 400);
-        }
-
-        try {
-            DB::beginTransaction();
-            $user->markEmailAsVerified();
-            Log::info('Email marcado como verificado: ' . $user->email_verified_at);
-            $user->verification_code = null; // Limpiar el código
-            //$user->removeRole('Guest'); 
-            //$user->assignRole('User');
-            $user->syncRoles('User');
-            $user->save(); //todos menos email lo ocupan
-            Log::info('Cambios guardados en la base de datos.');
-            DB::commit();
-            return response()->json(['mensaje' => 'Cuenta activada exitosamente'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error al activar cuenta: " . $e->getMessage());
-            return response()->json(['error' => 'Ocurrió un problema al activar la cuenta'], 500);
-        }
+    
+        // 6. Marcar como verificado
+        $user->update([
+            'verification_code' => null
+        ]);
+        $user->markEmailAsVerified();
+        $user->syncRoles('User');
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Email verificado correctamente'
+        ]);
     }
 
     public function reenviarCodigo(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:8'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'mensaje' => 'Error en la validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $user = User::where('email', $request->email)->first();
-
-        if ($user && Hash::check($request->password, $user->password)) {
-
-            if ($user->email_verified_at !== null) {
-                return response()->json(['mensaje' => 'La cuenta ya está activada'], 400);
+        DB::beginTransaction();
+        try {
+            // Validación de credenciales
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email|exists:users,email',
+                'password' => 'required|min:8'
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'mensaje' => 'Error en la validación',
+                    'errors' => $validator->errors()
+                ], 422);
             }
+    
+            // Buscar y autenticar usuario
+            $user = User::where('email', $request->email)->first();
+    
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json(['mensaje' => 'Credenciales incorrectas'], 401);
+            }
+    
+            // Verificar si ya está activado
+            if ($user->email_verified_at) {
+                return response()->json(['mensaje' => 'Este usuario ya está verificado'], 400);
+            }
+    
+            // Verificar código existente y vigente
+            if ($user->verification_code && $user->verification_code_expires_at) {
+                $expirationDate = Carbon::parse($user->verification_code_expires_at);
+                
+                if ($expirationDate > now()) {
+                    $tiempoRestante = $expirationDate->diffInSeconds(now());
+                    
+                    return response()->json([
+                        'mensaje' => 'Ya existe un código de verificación activo',
+                        'intenta_nuevamente_en' => $tiempoRestante,
+                        'disponible_en' => $expirationDate->toDateTimeString()
+                    ], 429);
+                }
+            }
+    
+            // Generar nuevo código con expiración
+            $newCode = Str::random(6);
+            $expiration = now()->addMinutes(5);
             
-        // Generar un nuevo código de verificación
-        $newVerificationCode = Str::random(6); // Código de 6 caracteres
-        $user->verification_code = $newVerificationCode;
-        $user->verification_code_expires_at = Carbon::now()->addMinutes(5); // Válido por 5 minutos
-        $user->save();
-
-        // Enviar el nuevo código por correo electrónico
-        $frontendUri = config('app.frontend_uri');
-
-        Mail::to($user->email)->send(new RegistroCodigoCorreo($user, 'Nuevo código de verificación', $newVerificationCode, $frontendUri));
-
-            return response()->json(['mensaje' => 'Correo de activación reenviado']);
-        }
-        else 
-        {  
-            return response()->json(['mensaje' => 'Credenciales inválidas'], 422);
+            $user->update([
+                'verification_code' => $newCode,
+                'verification_code_expires_at' => $expiration // ¡No olvides esto!
+            ]);
+    
+            // Generar URL firmada
+            $verificationUrl = URL::temporarySignedRoute(
+                'verificar-codigo',
+                $expiration, // Mismo tiempo que el código
+                [
+                    'id' => $user->id,
+                    'hash' => sha1($user->email),
+                    'code' => $newCode
+                ]
+            );
+    
+            // Construir URL para frontend
+            $frontendUri = config('app.frontend_uri') . '/verificacion?' . http_build_query([
+                'code' => $newCode,
+                'verify_url' => $verificationUrl,
+                'expires_at' => $expiration->timestamp
+            ]);
+    
+            // Enviar correo
+            Mail::to($user->email)->send(new RegistroCodigoCorreo(
+                $user, 
+                'Nuevo código de verificación', 
+                $newCode, 
+                $frontendUri
+            ));
+    
+            DB::commit();
+    
+            return response()->json([
+                'mensaje' => 'Nuevo código enviado',
+                'expira_en' => $expiration->toDateTimeString()
+            ], 200);
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error al reenviar código: ' . $e->getMessage());
+            return response()->json(['error' => 'Error en el servidor'], 500);
         }
     }
 

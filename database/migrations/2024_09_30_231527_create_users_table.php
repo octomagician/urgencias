@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('persona_id')->nullable();
             $table->unsignedBigInteger('tipo_id')->nullable();
             $table->string('verification_code')->nullable(); // Código de verificación
-            $table->timestamp('verification_code_expires_at')->nullable(); // Fecha de expiración
+            $table->timestamp('verification_code_expires_at')->nullable(); // Fecha de expiración del código
             $table->timestamps();
             $table->softDeletes();
             $table->rememberToken();
