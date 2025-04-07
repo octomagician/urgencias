@@ -5,15 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Estudio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use App\Models\TiposDeEstudio;
+use App\Models\Persona;
 
 class EstudiosController extends Controller
 {
     public function index()
     {
         $estudios = Estudio::all();
-        return response()->json([
-            'estudios' => $estudios
-        ], 200);
+        $estudios = $estudios->map(function ($estudio) {
+            $user = User::find($estudio->user_id);
+            $persona = Persona::find($user->persona_id);
+            $tipo = TiposDeEstudio::find($estudio->tipos_de_estudios_id);
+            return [
+                'id' => $estudio->id,
+                'tipo_estudio' => $tipo->nombre,
+                'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                'fecha' => $estudio->created_at
+            ];
+        });
+        return response()->json(['estudios' => $estudios], 200);
     }
 
     public function create(Request $request)
@@ -44,14 +56,29 @@ class EstudiosController extends Controller
             if (!$estudio) {
                 return response()->json(['mensaje' => 'No encontrado'], 404);
             }
-            return response()->json([
-                'estudio' => $estudio
-            ], 200);
+            $user = User::find($estudio->user_id);
+            $persona = Persona::find($user->persona_id);
+            $tipo = TiposDeEstudio::find($estudio->tipos_de_estudios_id);
+            return [
+                'id' => $estudio->id,
+                'tipo_estudio' => $tipo->nombre,
+                'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                'fecha' => $estudio->created_at
+            ];
         } else {
             $estudios = Estudio::all();
-            return response()->json([
-                'estudios' => $estudios
-            ], 200);
+            $estudios = $estudios->map(function ($estudio) {
+                $user = User::find($estudio->user_id);
+                $persona = Persona::find($user->persona_id);
+                $tipo = TiposDeEstudio::find($estudio->tipos_de_estudios_id);
+                return [
+                    'id' => $estudio->id,
+                    'tipo_estudio' => $tipo->nombre,
+                    'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                    'fecha' => $estudio->created_at
+                ];
+            });
+            return response()->json(['estudios' => $estudios], 200);
         }
     }
 
