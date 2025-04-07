@@ -12,6 +12,14 @@ class CamaController extends Controller
     public function index()
     {
         $camas = Cama::all();
+        $camas = $camas->map(function ($cama) {
+            $area = Area::find($cama->area_id);
+            return [
+                'id' => $cama->id,
+                'numero_cama' => $cama->numero_cama,
+                'area' => $area->nombre ?? null,
+            ];
+        });
         return response()->json(['camas' => $camas], 200);
     }
 
@@ -38,15 +46,29 @@ class CamaController extends Controller
     {
         if ($id) {
             $cama = Cama::find($id);
-            if (!$cama) {
+            $area = Area::find($cama->area_id);
+            if (!$cama||!$area) {
                 return response()->json(['mensaje' => 'No encontrado'], 404);
             }
-            return response()->json(['cama' => $cama], 200);
+            return response()->json([
+                'id' => $cama->id,
+                'numero_cama' => $cama->numero_cama,
+                'area' => $area->nombre,
+            ], 200);
         } else {
             $camas = Cama::all();
+            $camas = $camas->map(function ($cama) {
+                $area = Area::find($cama->area_id);
+                return [
+                    'id' => $cama->id,
+                    'numero_cama' => $cama->numero_cama,
+                    'area' => $area->nombre ?? null,
+                ];
+            });
             return response()->json(['camas' => $camas], 200);
         }
     }
+    
     public function update(Request $request, $id)
     {
         \Log::info('Iniciando método update', ['id' => $id, 'request' => $request->all()]);
