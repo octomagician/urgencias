@@ -7,16 +7,35 @@ use App\Http\Requests\HistorialRequest;
 use Illuminate\Http\Request;
 use App\Events\HistorialRefresh;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Persona;
+use App\Models\Ingreso;
 
 class HistorialController extends Controller
 {
     public function index()
     {
         $historial = Historial::all();
+        $historial = $historial->map(function ($historia) {
+            $user = User::find($historia->user_id);
+            $persona = Persona::find($user->persona_id);
+            $ingreso = Ingreso::find($historia->ingreso_id);
+            return [
+                'id' => $historia->id,
+                'ingreso' => $ingreso->fecha_ingreso,
+                'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                'fecha' => $historia->created_at,
+                'presion' => $historia->presion,
+                'temperatura' => $historia->temperatura,
+                'glucosa' => $historia->glucosa,
+                'sintomatologia' => $historia->sintomatologia,
+                'observaciones' => $historia->observaciones
+            ];
+        });
         return response()->json([
             'historial' => $historial
         ], 200);
-    }
+    } 
 
     public function create(HistorialRequest $request)
     {
@@ -33,13 +52,42 @@ class HistorialController extends Controller
             if (!$historial) {
                 return response()->json(['mensaje' => 'No encontrado'], 404);
             }
+            $user = User::find($historial->user_id);
+            $persona = Persona::find($user->persona_id);
+            $ingreso = Ingreso::find($historial->ingreso_id);
+            return [
+                'id' => $historial->id,
+                'ingreso' => $ingreso->fecha_ingreso,
+                'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                'fecha' => $historial->created_at,
+                'presion' => $historial->presion,
+                'temperatura' => $historial->temperatura,
+                'glucosa' => $historial->glucosa,
+                'sintomatologia' => $historial->sintomatologia,
+                'observaciones' => $historial->observaciones
+            ];
         } else {
             $historial = Historial::all();
+            $historial = $historial->map(function ($historia) {
+                $user = User::find($historia->user_id);
+                $persona = Persona::find($user->persona_id);
+                $ingreso = Ingreso::find($historia->ingreso_id);
+                return [
+                    'id' => $historia->id,
+                    'ingreso' => $ingreso->fecha_ingreso,
+                    'personal' => $persona->nombre . ' ' . $persona->apellido_paterno . ' ' . $persona->apellido_materno,
+                    'fecha' => $historia->created_at,
+                    'presion' => $historia->presion,
+                    'temperatura' => $historia->temperatura,
+                    'glucosa' => $historia->glucosa,
+                    'sintomatologia' => $historia->sintomatologia,
+                    'observaciones' => $historia->observaciones
+                ];
+            });
+            return response()->json([
+                'historial' => $historial
+            ], 200);
         }
-
-        return response()->json([
-            'historial' => $historial
-        ], 200);
     }
 
     public function update(HistorialRequest $request, $id)
